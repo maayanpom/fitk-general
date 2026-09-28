@@ -1,6 +1,10 @@
 {
   "rewrites": [
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
+    { "source": "/preview/day-1", "destination": "/preview/day-1.html" },
+    { "source": "/preview/day-2", "destination": "/preview/day-2.html" },
+    { "source": "/preview/day-3", "destination": "/preview/day-3.html" },
+    { "source": "/preview/toolbox", "destination": "/preview/toolbox.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
