@@ -59,7 +59,7 @@ function CopyLinkButton({ slug }: { slug: string }) {
 // Minimal, data-free oversight for the super admin: who's registered, and
 // their public link - never participants or leads, per the platform's rule
 // that coach data is private per coach, even from the super admin.
-export function CoachesList() {
+export function CoachesList({ currentCoachId }: { currentCoachId: string }) {
   const [coaches, setCoaches] = useState<CoachSummary[]>([])
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
   const [deleteTarget, setDeleteTarget] = useState<CoachSummary | null>(null)
@@ -132,7 +132,7 @@ export function CoachesList() {
               </TableCell>
               <TableCell>{formatRelativeDay(c.createdAt)}</TableCell>
               <TableCell>
-                {c.participantCount === 0 && (
+                {c.participantCount === 0 && c.id !== currentCoachId && (
                   <Button
                     size="icon-sm"
                     variant="destructive"

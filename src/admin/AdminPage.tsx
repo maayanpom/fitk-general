@@ -510,7 +510,7 @@ function Dashboard() {
             <CoachSettings coach={coach} onSaved={setCoach} />
           )}
 
-          {tab === "coaches" && isSuperAdmin && <CoachesList />}
+          {tab === "coaches" && isSuperAdmin && <CoachesList currentCoachId={coach.id} />}
         </>
       )}
 
