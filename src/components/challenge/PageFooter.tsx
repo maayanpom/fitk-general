@@ -23,11 +23,9 @@ const PolicyLink = styled(Link)`
 `
 
 export function PageFooter({ coachSlug }: { coachSlug: string }) {
-  if (!coachSlug) return null
-
   return (
     <Footer>
-      <PolicyLink to={`/${coachSlug}/privacy-policy`}>
+      <PolicyLink to={coachSlug ? `/${coachSlug}/privacy-policy` : "/privacy-policy"}>
         <Lock size={14} />
         מדיניות פרטיות
       </PolicyLink>

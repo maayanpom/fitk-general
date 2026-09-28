@@ -43,13 +43,26 @@ const Center = styled(PageInner)`
   text-align: center;
 `
 
+// Shown at the slug-less /privacy-policy route, so there's always one stable
+// URL that's reachable without a specific coach's link (e.g. for ad-platform
+// review) - attributed to the platform owner rather than a specific coach.
+const PLATFORM_OWNER: CoachPublicInfo = {
+  name: "מעיין פאר",
+  email: "maayanpom@gmail.com",
+  phone: "",
+  communityUrl: null,
+  slug: "",
+}
+
 export default function PrivacyPolicyPage() {
   const { slug } = useParams<{ slug: string }>()
-  const [coach, setCoach] = useState<CoachPublicInfo | null | undefined>(undefined)
+  const [coach, setCoach] = useState<CoachPublicInfo | null | undefined>(
+    slug ? undefined : PLATFORM_OWNER,
+  )
 
   useEffect(() => {
     if (!slug) {
-      setCoach(null)
+      setCoach(PLATFORM_OWNER)
       return
     }
     let cancelled = false

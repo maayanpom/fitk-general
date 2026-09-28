@@ -58,6 +58,7 @@ export default function App() {
       <Route path="/start/:code/:target" element={<StartRoute />} />
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/:slug/register" element={<RegisterPage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="/:slug/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<FallbackRedirect />} />
     </Routes>
