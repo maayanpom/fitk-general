@@ -27,7 +27,7 @@ export const SITUATIONS: Situation[] = [
   {
     id: "unplanned",
     emoji: "😵",
-    label: "אני פשוט לא מתוכננ/ת",
+    label: "אין לי תכנון מראש",
     toolIds: ["plan30", "emergencyMeal", "bagSnack", "notStarving", "homeList"],
   },
 ]

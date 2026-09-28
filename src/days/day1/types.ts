@@ -5,7 +5,10 @@ export type EatingPoint = {
 
 export type MealKey = "breakfast" | "morningSnack" | "lunch" | "afternoon" | "dinner"
 
-export type HardestMoment = MealKey | "snacks" | ""
+// "" means unanswered; "none" means answered with "no hard point today" -
+// distinct sentinels so we can tell "hasn't looked yet" from "looked, and
+// there wasn't one" (the latter no longer blocks completing the day).
+export type HardestMoment = MealKey | "snacks" | "none" | ""
 
 export type Day1Data = Record<MealKey, EatingPoint> & {
   additionalSnacks: EatingPoint[]
@@ -37,4 +40,5 @@ export const MEALS: { key: MealKey; emoji: string; label: string }[] = [
 export const HARDEST_OPTIONS: { value: Exclude<HardestMoment, "">; label: string }[] = [
   ...MEALS.map(({ key, label }) => ({ value: key, label })),
   { value: "snacks", label: "נשנושים בין לבין" },
+  { value: "none", label: "אין נקודה קשה היום" },
 ]

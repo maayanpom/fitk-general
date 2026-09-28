@@ -56,6 +56,7 @@ export function EatingPointFields({ id, value, foodLabel, onChange }: Props) {
         <Label htmlFor={`${id}-food`}>{foodLabel}</Label>
         <Input
           id={`${id}-food`}
+          maxLength={60}
           value={value.food}
           onChange={(e) => onChange({ ...value, food: e.target.value })}
         />

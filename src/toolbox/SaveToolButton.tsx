@@ -30,7 +30,7 @@ export function SaveToolButton({ toolId, className }: { toolId: string; classNam
       }}
     >
       <Star />
-      {saved ? "נשמר אצלי" : "שומר/ת לעצמי"}
+      {saved ? "נשמר אצלי" : "שמירה לעצמי"}
     </StarButton>
   )
 }

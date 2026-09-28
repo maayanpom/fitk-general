@@ -14,7 +14,7 @@ import { getDay2Feedback } from "./feedback"
 type PlateComponent = "protein" | "vegetables" | "carbs" | "fat"
 
 const COMPONENTS: { key: PlateComponent; emoji: string; title: string; examples: string }[] = [
-  { key: "protein", emoji: "🍗", title: "מקור חלבון", examples: "דג, עוף, בשר, טופו..." },
+  { key: "protein", emoji: "🍗", title: "מקור חלבון", examples: "עוף, דג, בשר, ביצים, גבינות, טופו, קטניות..." },
   { key: "vegetables", emoji: "🥗", title: "ירקות", examples: "סלט, מלפפון, עגבנייה, ירקות מבושלים..." },
   { key: "carbs", emoji: "🍞", title: "מקור פחמימה", examples: "לחם, אורז, תפו\"א, פתיתים, פסטה, חומוס..." },
   { key: "fat", emoji: "🥑", title: "מקור שומן לפי הצורך", examples: "אבוקדו, טחינה" },

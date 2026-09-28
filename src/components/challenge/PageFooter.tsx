@@ -4,8 +4,18 @@ import styled from "styled-components"
 
 const Footer = styled.footer`
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   padding-top: 8px;
+  text-align: center;
+`
+
+const Disclaimer = styled.p`
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.5;
 `
 
 const PolicyLink = styled(Link)`
@@ -22,9 +32,16 @@ const PolicyLink = styled(Link)`
   }
 `
 
-export function PageFooter({ coachSlug }: { coachSlug: string }) {
+export function PageFooter({
+  coachSlug,
+  disclaimer,
+}: {
+  coachSlug: string
+  disclaimer?: boolean
+}) {
   return (
     <Footer>
+      {disclaimer && <Disclaimer>תוכן חינוכי ואינו מהווה ייעוץ רפואי או תזונתי.</Disclaimer>}
       <PolicyLink to={coachSlug ? `/${coachSlug}/privacy-policy` : "/privacy-policy"}>
         <Lock size={14} />
         מדיניות פרטיות

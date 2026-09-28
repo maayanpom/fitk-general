@@ -232,7 +232,7 @@ export default function ToolboxPage() {
           <SectionTitle>⭐ הכלים שבחרתי לעצמי</SectionTitle>
           {savedTools.length === 0 ? (
             <Subtle>
-              עוד לא בחרת כלים. לחצו על "שומר/ת לעצמי" בכלים שמתאימים לחיים שלכם – מספיקים 2–4.
+              עוד לא בחרתם כלים. לחצו על "שמירה לעצמי" בכלים שמתאימים לחיים שלכם, מספיקים 2 עד 4.
             </Subtle>
           ) : (
             <CardList>

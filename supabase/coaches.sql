@@ -197,6 +197,9 @@ begin
 end;
 $$;
 
+revoke all on function public.link_registration_to_participant(uuid, uuid) from public;
+grant execute on function public.link_registration_to_participant(uuid, uuid) to authenticated;
+
 -- get_participant: now returns jsonb (was the plain participants row) so it can
 -- include the owning coach's slug in one round trip, for /start/:code to know
 -- which coach's public WhatsApp/community settings to show afterward.
