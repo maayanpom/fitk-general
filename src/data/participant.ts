@@ -1,6 +1,10 @@
 import { createEmptyDay1, type Day1Data } from "@/days/day1/types"
 
+// Which meal the participant is evaluating for day 2 - "" means unanswered.
+export type Day2MealChoice = "morning" | "lunch" | "afternoon" | "evening" | "between" | ""
+
 export type Day2Data = {
+  mealChosen: Day2MealChoice
   protein: boolean
   vegetables: boolean
   carbs: boolean
@@ -8,10 +12,35 @@ export type Day2Data = {
   completedAt: string
 }
 
+export type Day3MomentChoice = "morning" | "lunchWork" | "afternoon" | "evening" | "weekend" | "other" | ""
+export type Day3HappensChoice =
+  | "skip"
+  | "grabWhatever"
+  | "quickStanding"
+  | "screen"
+  | "orderIn"
+  | "largeAmount"
+  | "other"
+  | ""
+// Shared taxonomy: what would help (question 3) and the weekly experiment
+// use the same categories - the experiment defaults to whatever was picked
+// for "what would help", and can be changed independently from there.
+export type Day3HelpChoice =
+  | "readyMade"
+  | "reminder"
+  | "protein"
+  | "drink"
+  | "planAhead"
+  | "smallHelp"
+  | "other"
+  | ""
+
 export type Day3Data = {
-  difficultMoment: string
-  whatUsuallyHappens: string
-  whatIWishFor: string
+  momentChoice: Day3MomentChoice
+  happensChoice: Day3HappensChoice
+  helpChoice: Day3HelpChoice
+  experimentChoice: Day3HelpChoice
+  extraNote: string
   completedAt: string
 }
 
@@ -40,6 +69,7 @@ export type Participant = {
 export type Section = "day1" | "day2" | "day3" | "toolbox"
 
 const emptyDay2 = (): Day2Data => ({
+  mealChosen: "",
   protein: false,
   vegetables: false,
   carbs: false,
@@ -48,9 +78,11 @@ const emptyDay2 = (): Day2Data => ({
 })
 
 const emptyDay3 = (): Day3Data => ({
-  difficultMoment: "",
-  whatUsuallyHappens: "",
-  whatIWishFor: "",
+  momentChoice: "",
+  happensChoice: "",
+  helpChoice: "",
+  experimentChoice: "",
+  extraNote: "",
   completedAt: "",
 })
 

@@ -7,9 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { Participant } from "@/data/participant"
+import type { Day3Data, Participant } from "@/data/participant"
 import { HARDEST_OPTIONS, MEALS } from "@/days/day1/types"
+import { MEAL_OPTIONS } from "@/days/day2/content"
 import { getDay2Feedback } from "@/days/day2/feedback"
+import { EXPERIMENTS, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
 import { TOOLS_BY_ID } from "@/toolbox/tools"
 import { formatDateTime } from "./adminData"
 
@@ -78,6 +80,11 @@ function Section({
 const orDash = (value: string) => value.trim() || "—"
 const yesNo = (value: boolean) => (value ? "✓" : "—")
 
+function experimentText(day3: Day3Data): string {
+  const key = day3.experimentChoice || day3.helpChoice
+  return key ? EXPERIMENTS[key] : "—"
+}
+
 export function ParticipantDetails({
   participant,
   onClose,
@@ -123,6 +130,12 @@ export function ParticipantDetails({
 
           <Section title="יום 2 – הצלחת שלי" completedAt={participant.day2.completedAt}>
             <dl>
+              <Row
+                label="ארוחה שנבחרה"
+                value={
+                  MEAL_OPTIONS.find((o) => o.value === participant.day2.mealChosen)?.label ?? "—"
+                }
+              />
               <Row label="חלבון" value={yesNo(participant.day2.protein)} />
               <Row label="ירקות" value={yesNo(participant.day2.vegetables)} />
               <Row label="פחמימה" value={yesNo(participant.day2.carbs)} />
@@ -135,9 +148,28 @@ export function ParticipantDetails({
 
           <Section title="יום 3 – הפתרון שלי" completedAt={participant.day3.completedAt}>
             <dl>
-              <Row label="הרגע הקשה" value={orDash(participant.day3.difficultMoment)} />
-              <Row label="בדרך כלל אני" value={orDash(participant.day3.whatUsuallyHappens)} />
-              <Row label="מה הייתי רוצה" value={orDash(participant.day3.whatIWishFor)} />
+              <Row
+                label="הרגע הקשה"
+                value={
+                  MOMENT_OPTIONS.find((o) => o.value === participant.day3.momentChoice)?.label ??
+                  "—"
+                }
+              />
+              <Row
+                label="בדרך כלל קורה"
+                value={
+                  HAPPENS_OPTIONS.find((o) => o.value === participant.day3.happensChoice)?.label ??
+                  "—"
+                }
+              />
+              <Row
+                label="מה היה עוזר"
+                value={
+                  HELP_OPTIONS.find((o) => o.value === participant.day3.helpChoice)?.label ?? "—"
+                }
+              />
+              <Row label="הניסוי שנבחר" value={experimentText(participant.day3)} />
+              <Row label="הוסיפו" value={orDash(participant.day3.extraNote)} />
             </dl>
           </Section>
 
