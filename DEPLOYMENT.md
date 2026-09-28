@@ -16,9 +16,11 @@ A new coach signs herself up, with no Vercel/Supabase/GitHub access needed:
    link's slug any time from the "הגדרות" tab in her dashboard.
 
 The platform owner (super admin) has one extra tab in `/admin` — "מאמנות
-במערכת" — a read-only list of every registered coach (name, email, phone,
-their link, join date) for support purposes, such as resending a lost link.
-It never shows any coach's participants or leads.
+במערכת" — a list of every registered coach (name, email, phone, their link,
+join date) for support purposes, such as resending a lost link. It never
+shows any coach's participants or leads — only whether a coach has any
+(shown as a trash-icon delete button, available only for coaches with zero
+trainees, so removing one never silently drops trainee data).
 
 ## Older, single-tenant approach (superseded)
 

@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, Trash2 } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Table,
   TableBody,
@@ -10,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { fetchAllCoachesSummary, type CoachSummary } from "@/data/coach"
+import { deleteCoach, fetchAllCoachesSummary, type CoachSummary } from "@/data/coach"
 import { formatRelativeDay } from "./adminData"
 
 const Panel = styled.div`
@@ -54,6 +62,9 @@ function CopyLinkButton({ slug }: { slug: string }) {
 export function CoachesList() {
   const [coaches, setCoaches] = useState<CoachSummary[]>([])
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
+  const [deleteTarget, setDeleteTarget] = useState<CoachSummary | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
 
   useEffect(() => {
     fetchAllCoachesSummary()
@@ -67,8 +78,24 @@ export function CoachesList() {
       })
   }, [])
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    setDeleteError("")
+    try {
+      await deleteCoach(deleteTarget.id)
+      setCoaches((prev) => prev.filter((c) => c.id !== deleteTarget.id))
+      setDeleteTarget(null)
+    } catch (err) {
+      console.error("Failed to delete coach", err)
+      setDeleteError("מחיקת המאמן/ת נכשלה. יכול להיות שנוספו לו/לה מתאמנים בינתיים - רעננו ונסו שוב.")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (status === "loading") return null
-  if (status === "error") return <ErrorText>לא הצלחנו לטעון את רשימת המאמנות.</ErrorText>
+  if (status === "error") return <ErrorText>לא הצלחנו לטעון את רשימת המאמנים/ות.</ErrorText>
 
   return (
     <Panel>
@@ -80,13 +107,14 @@ export function CoachesList() {
             <TableHead className="text-start">טלפון</TableHead>
             <TableHead className="text-start">קישור הרשמה</TableHead>
             <TableHead className="text-start">הצטרפ/ה</TableHead>
+            <TableHead className="text-start"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {coaches.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
-                עוד אין מאמנות רשומות
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
+                עוד אין מאמנים/ות רשומים
               </TableCell>
             </TableRow>
           )}
@@ -103,10 +131,47 @@ export function CoachesList() {
                 <CopyLinkButton slug={c.slug} />
               </TableCell>
               <TableCell>{formatRelativeDay(c.createdAt)}</TableCell>
+              <TableCell>
+                {c.participantCount === 0 && (
+                  <Button
+                    size="icon-sm"
+                    variant="destructive"
+                    onClick={() => {
+                      setDeleteError("")
+                      setDeleteTarget(c)
+                    }}
+                  >
+                    <Trash2 />
+                  </Button>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+      >
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>למחוק את {deleteTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              הפעולה תמחק לצמיתות את חשבון המאמן/ת וקישור ההרשמה שלו/ה. אין דרך לבטל.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && <ErrorText>{deleteError}</ErrorText>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              ביטול
+            </Button>
+            <Button variant="destructive" onClick={() => void confirmDelete()} disabled={deleting}>
+              מחיקה
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Panel>
   )
 }

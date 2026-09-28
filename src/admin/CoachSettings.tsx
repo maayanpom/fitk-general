@@ -3,7 +3,7 @@ import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { updateOwnCoach, type Coach } from "@/data/coach"
+import { isSlugTaken, updateOwnCoach, type Coach } from "@/data/coach"
 
 const Card = styled.form`
   display: flex;
@@ -80,6 +80,10 @@ export function CoachSettings({
     setError("")
     setSaved(false)
     try {
+      if (slug.trim() !== coach.slug && (await isSlugTaken(slug, coach.id))) {
+        setError("הקישור הזה כבר תפוס. נסו קישור אחר.")
+        return
+      }
       await updateOwnCoach(coach.id, { name, phone, communityUrl, slug })
       onSaved({ ...coach, name, phone, communityUrl: communityUrl.trim() || null, slug })
       setSaved(true)

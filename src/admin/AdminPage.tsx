@@ -334,7 +334,7 @@ function Dashboard() {
 
       {status === "loading" && <Subtle>טוען...</Subtle>}
       {status === "no-profile" && (
-        <ErrorText>לא נמצא פרופיל מאמנת לחשבון הזה. פני אלינו לעזרה.</ErrorText>
+        <ErrorText>לא נמצא פרופיל מאמן/ת לחשבון הזה. פנו אלינו לעזרה.</ErrorText>
       )}
       {status === "error" && <ErrorText>לא הצלחנו לטעון את הנתונים. נסו לרענן.</ErrorText>}
 

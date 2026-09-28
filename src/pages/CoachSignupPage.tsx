@@ -80,7 +80,7 @@ export default function CoachSignupPage() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    document.title = "הרשמה כמאמנת"
+    document.title = "הרשמה כמאמן/ת"
   }, [])
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export default function CoachSignupPage() {
       <PageShell>
         <Center>
           <Card>
-            <PageTitle as="h1">ברוכה הבאה, {created.name}!</PageTitle>
+            <PageTitle as="h1">ברוכים הבאים, {created.name}!</PageTitle>
             <Subtle>זה הקישור הציבורי שלך להרשמה לאתגר - אפשר לשתף אותו בכל מקום.</Subtle>
             <LinkRow>
               <Input readOnly dir="ltr" value={link} onFocus={(e) => e.target.select()} />
@@ -151,7 +151,7 @@ export default function CoachSignupPage() {
       <Center>
         <Card as="form" onSubmit={(e) => void submit(e)}>
           <header>
-            <PageTitle>הרשמה כמאמנת</PageTitle>
+            <PageTitle>הרשמה כמאמן/ת</PageTitle>
             <Subtle>פותחים את החשבון שלך לניהול האתגר</Subtle>
           </header>
 

@@ -95,6 +95,20 @@ export async function fetchOwnCoach(): Promise<Coach | null> {
   return data ? fromRow(data as CoachRow) : null
 }
 
+// Whether another coach already uses this slug - checked before saving so a
+// collision can be shown as an inline error instead of relying on the raw
+// Postgres "duplicate key" message after the write fails.
+export async function isSlugTaken(slug: string, excludeCoachId: string): Promise<boolean> {
+  if (!supabase) return false
+  const { count, error } = await supabase
+    .from("coaches")
+    .select("id", { count: "exact", head: true })
+    .eq("slug", slug.trim())
+    .neq("id", excludeCoachId)
+  if (error) throw error
+  return (count ?? 0) > 0
+}
+
 export async function updateOwnCoach(
   id: string,
   patch: Partial<Pick<Coach, "name" | "phone" | "communityUrl" | "slug">>,
@@ -126,24 +140,42 @@ export type CoachSummary = {
   phone: string
   slug: string
   createdAt: string
+  participantCount: number
 }
 
-// The super admin's minimal oversight list - never participant/lead data.
+type CoachWithCountRow = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  slug: string
+  created_at: string
+  participant_count: number
+}
+
+// The super admin's minimal oversight list - never participant/lead data,
+// only a trainee count (used to decide whether a coach can be deleted).
 export async function fetchAllCoachesSummary(): Promise<CoachSummary[]> {
   if (!supabase) return []
-  const { data, error } = await supabase
-    .from("coaches")
-    .select("id, name, email, phone, slug, created_at")
-    .order("created_at", { ascending: false })
+  const { data, error } = await supabase.rpc("admin_coaches_with_counts")
   if (error) throw error
-  return (data as CoachRow[]).map((row) => ({
+  return (data as CoachWithCountRow[]).map((row) => ({
     id: row.id,
     name: row.name,
     email: row.email,
     phone: row.phone,
     slug: row.slug,
     createdAt: row.created_at,
+    participantCount: row.participant_count,
   }))
+}
+
+// Deletes a coach who has zero trainees. Only the super admin can call this -
+// the RPC itself re-checks both the role and the trainee count server-side.
+export async function deleteCoach(id: string): Promise<void> {
+  if (!supabase) throw new Error("Supabase is not connected")
+  const { error } = await supabase.rpc("admin_delete_coach", { target_coach_id: id })
+  if (error) throw error
 }
 
 export type CoachPublicInfo = {

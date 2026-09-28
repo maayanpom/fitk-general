@@ -56,7 +56,7 @@ export default function StartPage() {
           <ErrorCard>
             <PageTitle as="h1">הקישור אינו תקין</PageTitle>
             <Subtle>
-              ייתכן שהקישור הועתק בטעות. יש לפנות למאמנת שקישרה אליכם כדי לקבל קישור חדש.
+              ייתכן שהקישור הועתק בטעות. יש לפנות למאמן/ת שקישר/ה אליכם כדי לקבל קישור חדש.
             </Subtle>
           </ErrorCard>
         </Center>
