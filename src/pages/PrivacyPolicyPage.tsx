@@ -136,8 +136,8 @@ export default function PrivacyPolicyPage() {
         <Section>
           <SectionTitle>איזה מידע נאסף</SectionTitle>
           <Body>
-            שם מלא, טלפון ומייל (בטופס במודעה), ותשובות שתמלאו בדפי האתגר על שגרת האכילה והיום
-            שלכם. אנא אל תכתבו מידע רפואי. האתגר מיועד לגילאי 18 ומעלה.
+            שם מלא, טלפון ומייל (בטופס ההרשמה, במודעה או באתר), ותשובות שתמלאו בדפי האתגר על שגרת
+            האכילה והיום שלכם. אנא אל תכתבו מידע רפואי. האתגר מיועד לגילאי 18 ומעלה.
           </Body>
         </Section>
 
@@ -153,7 +153,8 @@ export default function PrivacyPolicyPage() {
           <SectionTitle>עם מי משתפים</SectionTitle>
           <Body>
             HoldOn (שם, טלפון ומייל, רק לאחר אישורכם), Supabase (שירות אחסון הנתונים, שרתים
-            ב-ap-southeast-2), Meta (איסוף הטופס) ו-WhatsApp (תקשורת). לא מוכרים מידע.
+            ב-ap-southeast-2), Vercel (מארחת את האתר, וכחלק מכך רואה את כתובת ה-IP שלכם), Meta
+            (איסוף הטופס) ו-WhatsApp (תקשורת). לא מוכרים מידע.
           </Body>
         </Section>
 

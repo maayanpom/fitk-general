@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react"
+import { Check, Copy } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,8 +32,16 @@ const Field = styled.div`
   }
 `
 
+const LinkRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
 const LinkPreview = styled.p`
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 0.85rem;
   color: var(--muted-foreground);
   direction: ltr;
@@ -51,6 +60,26 @@ const SavedText = styled.span`
   font-weight: 600;
   font-size: 0.9rem;
 `
+
+function CopyLinkButton({ link }: { link: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API unavailable - nothing else to do here.
+    }
+  }
+
+  return (
+    <Button type="button" size="icon-sm" variant="outline" onClick={() => void copy()}>
+      {copied ? <Check /> : <Copy />}
+    </Button>
+  )
+}
 
 function friendlyError(err: unknown) {
   const code = err && typeof err === "object" && "code" in err ? String(err.code) : ""
@@ -136,7 +165,10 @@ export function CoachSettings({
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
         />
-        <LinkPreview>{window.location.origin}/{slug}/register</LinkPreview>
+        <LinkRow>
+          <LinkPreview>{window.location.origin}/{slug}/register</LinkPreview>
+          <CopyLinkButton link={`${window.location.origin}/${slug}/register`} />
+        </LinkRow>
       </Field>
 
       {error && <ErrorText>{error}</ErrorText>}
