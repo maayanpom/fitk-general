@@ -52,8 +52,10 @@ const SavedText = styled.span`
   font-size: 0.9rem;
 `
 
-function friendlyError(message: string) {
-  if (message.includes("duplicate") || message.includes("unique")) {
+function friendlyError(err: unknown) {
+  const code = err && typeof err === "object" && "code" in err ? String(err.code) : ""
+  const message = err instanceof Error ? err.message : ""
+  if (code === "23505" || message.includes("duplicate") || message.includes("unique")) {
     return "הקישור הזה כבר תפוס. נסו קישור אחר."
   }
   return "השמירה נכשלה. נסו שוב."
@@ -80,7 +82,7 @@ export function CoachSettings({
     setError("")
     setSaved(false)
     try {
-      if (slug.trim() !== coach.slug && (await isSlugTaken(slug, coach.id))) {
+      if (slug.trim() !== coach.slug && (await isSlugTaken(slug))) {
         setError("הקישור הזה כבר תפוס. נסו קישור אחר.")
         return
       }
@@ -90,7 +92,7 @@ export function CoachSettings({
       setTimeout(() => setSaved(false), 2000)
     } catch (err) {
       console.error("Failed to update coach settings", err)
-      setError(friendlyError(err instanceof Error ? err.message : ""))
+      setError(friendlyError(err))
     } finally {
       setSaving(false)
     }

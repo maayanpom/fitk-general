@@ -98,15 +98,14 @@ export async function fetchOwnCoach(): Promise<Coach | null> {
 // Whether another coach already uses this slug - checked before saving so a
 // collision can be shown as an inline error instead of relying on the raw
 // Postgres "duplicate key" message after the write fails.
-export async function isSlugTaken(slug: string, excludeCoachId: string): Promise<boolean> {
-  if (!supabase) return false
-  const { count, error } = await supabase
-    .from("coaches")
-    .select("id", { count: "exact", head: true })
-    .eq("slug", slug.trim())
-    .neq("id", excludeCoachId)
-  if (error) throw error
-  return (count ?? 0) > 0
+//
+// Goes through the public slug lookup (a security-definer RPC, declared
+// below) rather than a plain table query: RLS only lets a coach read their
+// own row ("coach reads own row" in coaches.sql), so a direct query could
+// never see another coach's slug and this check would silently never fire.
+export async function isSlugTaken(slug: string): Promise<boolean> {
+  const info = await getCoachPublicBySlug(slug.trim())
+  return info !== null
 }
 
 export async function updateOwnCoach(
