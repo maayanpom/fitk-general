@@ -1,7 +1,7 @@
 import { MessageCircle, Users } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
-import { COMMUNITY_URL, personalFeedbackUrl } from "@/config"
+import { personalFeedbackUrl } from "@/config"
 
 const LinkButton = styled(Button)`
   width: 100%;
@@ -11,10 +11,20 @@ const LinkButton = styled(Button)`
   font-weight: 600;
 `
 
-export function PersonalFeedbackButton({ firstName }: { firstName?: string }) {
+type PersonalFeedbackButtonProps = {
+  firstName?: string
+  // The owning coach's WhatsApp number - undefined while still loading, in
+  // which case the button just doesn't render yet rather than showing a
+  // broken link.
+  phone: string | undefined
+}
+
+export function PersonalFeedbackButton({ firstName, phone }: PersonalFeedbackButtonProps) {
+  if (!phone) return null
+
   return (
     <LinkButton variant="outline" asChild>
-      <a href={personalFeedbackUrl(firstName)} target="_blank" rel="noopener noreferrer">
+      <a href={personalFeedbackUrl(phone, firstName)} target="_blank" rel="noopener noreferrer">
         <MessageCircle />
         לקבלת פידבק אישי
       </a>
@@ -44,7 +54,11 @@ const Invite = styled.section`
   }
 `
 
-export function CommunityInvite() {
+// Renders nothing if the coach hasn't set a community link (still loading,
+// or simply hasn't added one yet in her settings) - no broken/placeholder link.
+export function CommunityInvite({ communityUrl }: { communityUrl: string | null | undefined }) {
+  if (!communityUrl) return null
+
   return (
     <Invite>
       <h3>רוצים להמשיך איתי גם אחרי האתגר?</h3>
@@ -53,7 +67,7 @@ export function CommunityInvite() {
         בשגרה האמיתית.
       </p>
       <LinkButton asChild>
-        <a href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">
+        <a href={communityUrl} target="_blank" rel="noopener noreferrer">
           <Users />
           הצטרפו לקהילת הטיפים שלי
         </a>

@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
-import {
-  createParticipant,
-  normalizeParticipant,
-  type Participant,
-  type Section,
-} from "./participant"
+import { normalizeParticipant, type Participant, type Section } from "./participant"
 import { ParticipantContext, type SyncState } from "./participantContext"
 import { supabase } from "./supabase"
 
@@ -44,24 +39,21 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer)
   }, [participant, sync])
 
-  const start = useCallback(
-    (firstName: string) => setStored(createParticipant(firstName.trim())),
-    [setStored],
-  )
-
   // Adopts an existing participant (created by the coach in admin) as this
   // browser's local identity, via a personal /start/:code link.
   const adoptById = useCallback(
     async (code: string) => {
       if (!supabase) return false
       const { data, error } = await supabase.rpc("get_participant", { participant_id: code })
-      // Postgres returns a single row of nulls (not JSON null) for "no match"
-      // on a non-SETOF composite-returning function - `id` is the reliable check.
+      // get_participant returns real jsonb null for "no match" - unlike the
+      // old plain-composite version, this is a genuine null, not an
+      // all-fields-null object, but the ?. guard is safe either way.
       if (error || !data?.id) return false
 
       const row = data as {
         id: string
         first_name: string
+        coach_slug: string | null
         day1: Participant["day1"] | null
         day2: Participant["day2"] | null
         day3: Participant["day3"] | null
@@ -72,6 +64,7 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
       setStored(
         normalizeParticipant({
           participantId: row.id,
+          coachSlug: row.coach_slug ?? "",
           firstName: row.first_name,
           day1: row.day1 ?? ({} as Participant["day1"]),
           day2: row.day2 ?? ({} as Participant["day2"]),
@@ -123,8 +116,8 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
   }, [participant, sync])
 
   const value = useMemo(
-    () => ({ participant, syncState, start, adoptById, updateSection, completeSection, retrySync }),
-    [participant, syncState, start, adoptById, updateSection, completeSection, retrySync],
+    () => ({ participant, syncState, adoptById, updateSection, completeSection, retrySync }),
+    [participant, syncState, adoptById, updateSection, completeSection, retrySync],
   )
 
   return <ParticipantContext.Provider value={value}>{children}</ParticipantContext.Provider>

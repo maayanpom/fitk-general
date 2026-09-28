@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { Navigate, useParams } from "react-router-dom"
 import styled from "styled-components"
 import { PageInner, PageShell, PageTitle, Subtle } from "@/components/layout/PageShell"
 import { ROOT_REDIRECT } from "@/config"
@@ -23,12 +23,6 @@ const ErrorCard = styled.div`
   background: var(--card);
   box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
 
-  a {
-    color: var(--primary);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
 `
 
 export default function StartPage() {
@@ -61,8 +55,9 @@ export default function StartPage() {
         <Center>
           <ErrorCard>
             <PageTitle as="h1">הקישור אינו תקין</PageTitle>
-            <Subtle>ייתכן שהקישור הועתק בטעות. אפשר לפנות אלינו, או להירשם מחדש.</Subtle>
-            <Link to="/register">להרשמה לאתגר →</Link>
+            <Subtle>
+              ייתכן שהקישור הועתק בטעות. יש לפנות למאמנת שקישרה אליכם כדי לקבל קישור חדש.
+            </Subtle>
           </ErrorCard>
         </Center>
       </PageShell>

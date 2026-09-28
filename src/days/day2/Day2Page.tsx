@@ -138,7 +138,7 @@ export default function Day2Page() {
           )}
         </ResultArea>
 
-        <PageFooter />
+        <PageFooter coachSlug={participant.coachSlug} />
       </PageInner>
     </PageShell>
   )

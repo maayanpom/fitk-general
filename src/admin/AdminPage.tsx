@@ -16,10 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { whatsAppLinkForPhone } from "@/config"
+import { checkIsSuperAdmin, fetchOwnCoach, type Coach } from "@/data/coach"
 import type { Participant } from "@/data/participant"
 import { supabase } from "@/data/supabase"
 import {
-  checkIsAdmin,
   createParticipant,
   fetchParticipants,
   fetchRegistrations,
@@ -27,6 +27,8 @@ import {
   linkRegistrationToParticipant,
   type Registration,
 } from "./adminData"
+import { CoachesList } from "./CoachesList"
+import { CoachSettings } from "./CoachSettings"
 import { ParticipantDetails } from "./ParticipantDetails"
 import { ParticipantLinkPicker } from "./ParticipantLinkPicker"
 
@@ -255,11 +257,15 @@ function Login() {
   )
 }
 
+type Tab = "participants" | "registrations" | "settings" | "coaches"
+
 function Dashboard() {
-  const [tab, setTab] = useState<"participants" | "registrations">("participants")
+  const [tab, setTab] = useState<Tab>("participants")
+  const [coach, setCoach] = useState<Coach | null>(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [registrations, setRegistrations] = useState<Registration[]>([])
-  const [status, setStatus] = useState<"loading" | "ready" | "forbidden" | "error">("loading")
+  const [status, setStatus] = useState<"loading" | "ready" | "no-profile" | "error">("loading")
   const [selected, setSelected] = useState<Participant | null>(null)
   const [linksFor, setLinksFor] = useState<Participant | null>(null)
   const [prefill, setPrefill] = useState<{
@@ -270,18 +276,20 @@ function Dashboard() {
 
   const load = useCallback(async () => {
     try {
-      if (!(await checkIsAdmin())) {
-        setStatus("forbidden")
+      const ownCoach = await fetchOwnCoach()
+      if (!ownCoach) {
+        setStatus("no-profile")
         return
       }
+      setCoach(ownCoach)
+      setIsSuperAdmin(await checkIsSuperAdmin())
     } catch (err) {
       console.error(err)
       setStatus("error")
       return
     }
 
-    // Independent try/catch per table: if `registrations` hasn't been created
-    // yet (supabase/registrations.sql not run), participants still loads fine.
+    // Independent try/catch per table: one failing doesn't block the other.
     const [p, r] = await Promise.allSettled([fetchParticipants(), fetchRegistrations()])
     if (p.status === "fulfilled") setParticipants(p.value)
     else console.error(p.reason)
@@ -325,10 +333,12 @@ function Dashboard() {
       </TopBar>
 
       {status === "loading" && <Subtle>טוען...</Subtle>}
-      {status === "forbidden" && <ErrorText>למשתמש הזה אין הרשאת צפייה בדשבורד.</ErrorText>}
+      {status === "no-profile" && (
+        <ErrorText>לא נמצא פרופיל מאמנת לחשבון הזה. פני אלינו לעזרה.</ErrorText>
+      )}
       {status === "error" && <ErrorText>לא הצלחנו לטעון את הנתונים. נסו לרענן.</ErrorText>}
 
-      {status === "ready" && (
+      {status === "ready" && coach && (
         <>
           <Tabs>
             <TabButton
@@ -345,6 +355,22 @@ function Dashboard() {
             >
               הרשמות
             </TabButton>
+            <TabButton
+              type="button"
+              $active={tab === "settings"}
+              onClick={() => setTab("settings")}
+            >
+              הגדרות
+            </TabButton>
+            {isSuperAdmin && (
+              <TabButton
+                type="button"
+                $active={tab === "coaches"}
+                onClick={() => setTab("coaches")}
+              >
+                מאמנות במערכת
+              </TabButton>
+            )}
           </Tabs>
 
           {tab === "participants" && (
@@ -479,6 +505,12 @@ function Dashboard() {
               </Table>
             </Panel>
           )}
+
+          {tab === "settings" && (
+            <CoachSettings coach={coach} onSaved={setCoach} />
+          )}
+
+          {tab === "coaches" && isSuperAdmin && <CoachesList />}
         </>
       )}
 

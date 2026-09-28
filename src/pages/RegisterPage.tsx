@@ -1,12 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { PartyPopper } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import styled from "styled-components"
 import { DoneButton } from "@/components/challenge/DoneButton"
 import { PageInner, PageShell, PageTitle, Subtle } from "@/components/layout/PageShell"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { getCoachPublicBySlug, type CoachPublicInfo } from "@/data/coach"
 import { supabase } from "@/data/supabase"
 
 const Center = styled(PageInner)`
@@ -85,6 +86,9 @@ const ThankYou = styled(Card)`
 `
 
 export default function RegisterPage() {
+  const { slug } = useParams<{ slug: string }>()
+  const [coach, setCoach] = useState<CoachPublicInfo | null | undefined>(undefined)
+
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
@@ -95,15 +99,35 @@ export default function RegisterPage() {
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    document.title = 'הרשמה – אתגר "3 ימים חוזרים לשגרה"'
-  }, [])
+    if (!slug) {
+      setCoach(null)
+      return
+    }
+    let cancelled = false
+    getCoachPublicBySlug(slug)
+      .then((data) => {
+        if (!cancelled) setCoach(data)
+      })
+      .catch(() => {
+        if (!cancelled) setCoach(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
+
+  useEffect(() => {
+    document.title = coach
+      ? `הרשמה לאתגר של ${coach.name}`
+      : 'הרשמה – אתגר "3 ימים חוזרים לשגרה"'
+  }, [coach])
 
   const canSubmit =
     name.trim() && phone.trim() && email.trim() && consentPrivacy && consentHoldon && !submitting
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!canSubmit) return
+    if (!canSubmit || !slug) return
     setSubmitting(true)
     setError("")
 
@@ -114,6 +138,7 @@ export default function RegisterPage() {
     }
 
     const { error } = await supabase.rpc("submit_registration", {
+      coach_slug: slug,
       full_name: name.trim(),
       phone: phone.trim(),
       email: email.trim(),
@@ -129,6 +154,29 @@ export default function RegisterPage() {
     }
 
     setDone(true)
+  }
+
+  if (coach === undefined) {
+    return (
+      <PageShell>
+        <Center>
+          <Subtle>טוען...</Subtle>
+        </Center>
+      </PageShell>
+    )
+  }
+
+  if (coach === null) {
+    return (
+      <PageShell>
+        <Center>
+          <Card>
+            <PageTitle as="h1">הקישור אינו תקין</PageTitle>
+            <Subtle>ייתכן שהקישור הועתק בטעות.</Subtle>
+          </Card>
+        </Center>
+      </PageShell>
+    )
   }
 
   if (done) {
@@ -151,7 +199,7 @@ export default function RegisterPage() {
         <Card as="form" onSubmit={(e) => void submit(e)}>
           <header>
             <PageTitle>הרשמה לאתגר</PageTitle>
-            <Subtle>"3 ימים חוזרים לשגרה"</Subtle>
+            <Subtle>של {coach.name} · "3 ימים חוזרים לשגרה"</Subtle>
           </header>
 
           <Field>
@@ -194,7 +242,7 @@ export default function RegisterPage() {
               onCheckedChange={(v) => setConsentPrivacy(v === true)}
             />
             <span>
-              קראתי ואני מסכים/ה ל<Link to="/privacy-policy">מדיניות הפרטיות</Link>.
+              קראתי ואני מסכים/ה ל<Link to={`/${slug}/privacy-policy`}>מדיניות הפרטיות</Link>.
             </span>
           </ConsentRow>
 

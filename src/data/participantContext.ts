@@ -6,7 +6,6 @@ export type SyncState = "idle" | "saving" | "saved" | "error" | "local"
 export type ParticipantContextValue = {
   participant: Participant | null
   syncState: SyncState
-  start: (firstName: string) => void
   adoptById: (code: string) => Promise<boolean>
   updateSection: <S extends Section>(section: S, patch: Partial<Participant[S]>) => void
   completeSection: (section: Section) => Promise<boolean>
@@ -28,6 +27,6 @@ export function useParticipantState() {
 // For pages rendered inside RequireParticipant, where a participant always exists.
 export function useParticipant() {
   const ctx = useParticipantContext()
-  if (!ctx.participant) throw new Error("useParticipant used outside NameGate")
+  if (!ctx.participant) throw new Error("useParticipant used outside RequireParticipant")
   return { ...ctx, participant: ctx.participant }
 }

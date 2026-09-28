@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { Day3Data } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
+import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 
 type Field = Exclude<keyof Day3Data, "completedAt">
 
@@ -96,6 +97,7 @@ const Celebration = styled.section`
 export default function Day3Page() {
   const { participant, updateSection } = useParticipant()
   const { isCompleted, complete, resultRef } = useCompletion("day3")
+  const coach = useCoachPublicInfo(participant.coachSlug)
   const data = participant.day3
 
   return (
@@ -146,12 +148,12 @@ export default function Day3Page() {
                   <Link to="/toolbox">לארגז הכלים שלי →</Link>
                 </Button>
               </Celebration>
-              <CommunityInvite />
+              <CommunityInvite communityUrl={coach?.communityUrl} />
             </>
           )}
         </ResultArea>
 
-        <PageFooter />
+        <PageFooter coachSlug={participant.coachSlug} />
       </PageInner>
     </PageShell>
   )

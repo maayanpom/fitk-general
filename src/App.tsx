@@ -4,6 +4,7 @@ import AdminPage from "@/admin/AdminPage"
 import { RequireParticipant } from "@/components/challenge/RequireParticipant"
 import { ROOT_REDIRECT } from "@/config"
 import { ParticipantProvider } from "@/data/ParticipantProvider"
+import CoachSignupPage from "@/pages/CoachSignupPage"
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage"
 import RegisterPage from "@/pages/RegisterPage"
 import StartPage from "@/pages/StartPage"
@@ -52,11 +53,12 @@ export default function App() {
           }
         />
       ))}
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/coach-signup" element={<CoachSignupPage />} />
       <Route path="/start/:code" element={<StartRoute />} />
       <Route path="/start/:code/:target" element={<StartRoute />} />
       <Route path="/admin" element={<AdminPage />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/:slug/register" element={<RegisterPage />} />
+      <Route path="/:slug/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<FallbackRedirect />} />
     </Routes>
   )

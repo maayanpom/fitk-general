@@ -1,7 +1,8 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useParams } from "react-router-dom"
 import styled from "styled-components"
 import { PageInner, PageShell, PageTitle, SectionTitle, Subtle } from "@/components/layout/PageShell"
-import { COACH_EMAIL, COACH_NAME } from "@/config"
+import { getCoachPublicBySlug, type CoachPublicInfo } from "@/data/coach"
 
 const Section = styled.section`
   display: flex;
@@ -36,10 +37,58 @@ const Disclaimer = styled.section`
   }
 `
 
+const Center = styled(PageInner)`
+  min-height: calc(100dvh - 64px);
+  justify-content: center;
+  text-align: center;
+`
+
 export default function PrivacyPolicyPage() {
+  const { slug } = useParams<{ slug: string }>()
+  const [coach, setCoach] = useState<CoachPublicInfo | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (!slug) {
+      setCoach(null)
+      return
+    }
+    let cancelled = false
+    getCoachPublicBySlug(slug)
+      .then((data) => {
+        if (!cancelled) setCoach(data)
+      })
+      .catch(() => {
+        if (!cancelled) setCoach(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
+
   useEffect(() => {
     document.title = 'מדיניות פרטיות – אתגר "3 ימים חוזרים לשגרה"'
   }, [])
+
+  if (coach === undefined) {
+    return (
+      <PageShell>
+        <Center>
+          <Subtle>טוען...</Subtle>
+        </Center>
+      </PageShell>
+    )
+  }
+
+  if (coach === null) {
+    return (
+      <PageShell>
+        <Center>
+          <PageTitle as="h1">הקישור אינו תקין</PageTitle>
+          <Subtle>ייתכן שהקישור הועתק בטעות.</Subtle>
+        </Center>
+      </PageShell>
+    )
+  }
 
   return (
     <PageShell>
@@ -52,8 +101,8 @@ export default function PrivacyPolicyPage() {
         <Section>
           <SectionTitle>מי אנחנו</SectionTitle>
           <Body>
-            האתגר מנוהל על ידי {COACH_NAME}. ליצירת קשר:{" "}
-            <a href={`mailto:${COACH_EMAIL}`}>{COACH_EMAIL}</a>.
+            האתגר מנוהל על ידי {coach.name}. ליצירת קשר:{" "}
+            <a href={`mailto:${coach.email}`}>{coach.email}</a>.
           </Body>
         </Section>
 
@@ -83,16 +132,14 @@ export default function PrivacyPolicyPage() {
 
         <Section>
           <SectionTitle>כמה זמן שומרים</SectionTitle>
-          <Body>
-            עד 3 חודשים מסיום הפעילות שלכם באתגר, או עד בקשת מחיקה.
-          </Body>
+          <Body>עד 3 חודשים מסיום הפעילות שלכם באתגר, או עד בקשת מחיקה.</Body>
         </Section>
 
         <Section>
           <SectionTitle>הזכויות שלכם</SectionTitle>
           <Body>
             לעיין, לתקן, למחוק ולבטל הסכמה בכל עת, בפנייה ל-
-            <a href={`mailto:${COACH_EMAIL}`}>{COACH_EMAIL}</a>.
+            <a href={`mailto:${coach.email}`}>{coach.email}</a>.
           </Body>
         </Section>
 

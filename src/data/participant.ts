@@ -25,6 +25,9 @@ export type ToolboxData = {
 
 export type Participant = {
   participantId: string
+  // Which coach owns this participant - set when a personal /start/:code
+  // link is opened (the coach herself never needs this on her own session).
+  coachSlug: string
   firstName: string
   day1: Day1Data
   day2: Day2Data
@@ -59,24 +62,11 @@ const emptyToolbox = (): ToolboxData => ({
   completedAt: "",
 })
 
-export function createParticipant(firstName: string): Participant {
-  const now = new Date().toISOString()
-  return {
-    participantId: crypto.randomUUID(),
-    firstName,
-    day1: createEmptyDay1(),
-    day2: emptyDay2(),
-    day3: emptyDay3(),
-    toolbox: emptyToolbox(),
-    createdAt: now,
-    updatedAt: now,
-  }
-}
-
 // Fills in any section/field missing from older saved data.
 export function normalizeParticipant(p: Participant): Participant {
   return {
     ...p,
+    coachSlug: p.coachSlug ?? "",
     day1: { ...createEmptyDay1(), ...p.day1 },
     day2: { ...emptyDay2(), ...p.day2 },
     day3: { ...emptyDay3(), ...p.day3 },

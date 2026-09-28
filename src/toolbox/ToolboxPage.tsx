@@ -8,6 +8,7 @@ import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipant } from "@/data/participantContext"
+import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import { useSavedTools } from "./useSavedTools"
 import { SITUATIONS } from "./situations"
 import { ToolCard } from "./ToolCard"
@@ -154,6 +155,7 @@ const Finale = styled.section`
 
 export default function ToolboxPage() {
   const { participant, syncState } = useParticipant()
+  const coach = useCoachPublicInfo(participant.coachSlug)
   const { selected } = useSavedTools()
   const { isCompleted, complete, resultRef } = useCompletion("toolbox")
   const [situationId, setSituationId] = useState<string | null>(null)
@@ -253,14 +255,14 @@ export default function ToolboxPage() {
                   <strong>כל התשובות שמילאתם במהלך האתגר נשלחו אליי.</strong>
                 </p>
                 <p>אם תרצו לקבל ממני פידבק אישי על מה שכתבתם – מוזמנים לפנות אליי בפרטי.</p>
-                <PersonalFeedbackButton firstName={participant.firstName} />
+                <PersonalFeedbackButton firstName={participant.firstName} phone={coach?.phone} />
               </Finale>
-              <CommunityInvite />
+              <CommunityInvite communityUrl={coach?.communityUrl} />
             </>
           )}
         </ResultArea>
 
-        <PageFooter />
+        <PageFooter coachSlug={participant.coachSlug} />
       </PageInner>
 
       <ToolDialog tool={openTool} onClose={() => setOpenTool(null)} />

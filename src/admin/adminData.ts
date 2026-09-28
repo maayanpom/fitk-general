@@ -15,6 +15,9 @@ type ParticipantRow = {
 function fromRow(row: ParticipantRow): Participant {
   return normalizeParticipant({
     participantId: row.id,
+    // Not needed anywhere in the admin UI (a coach only ever sees her own
+    // participants, via RLS) - only participant-facing pages use this.
+    coachSlug: "",
     firstName: row.first_name,
     day1: row.day1 ?? ({} as Participant["day1"]),
     day2: row.day2 ?? ({} as Participant["day2"]),
@@ -111,13 +114,6 @@ export async function createParticipant(firstName: string): Promise<string> {
   })
   if (error) throw error
   return id
-}
-
-export async function checkIsAdmin(): Promise<boolean> {
-  if (!supabase) return false
-  const { data, error } = await supabase.rpc("is_admin")
-  if (error) throw error
-  return Boolean(data)
 }
 
 const dateTime = new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short" })

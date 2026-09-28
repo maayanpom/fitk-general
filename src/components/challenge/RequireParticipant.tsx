@@ -1,14 +1,44 @@
 import type { ReactNode } from "react"
-import { Navigate } from "react-router-dom"
+import styled from "styled-components"
+import { PageInner, PageShell, PageTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipantState } from "@/data/participantContext"
 
-// Every participant now arrives either via a coach-issued personal link
-// (/start/:code) or via /register. A bare day/toolbox link with no local
-// identity yet has nowhere else to go but registration.
+const Center = styled(PageInner)`
+  min-height: calc(100dvh - 64px);
+  justify-content: center;
+  text-align: center;
+`
+
+const Card = styled.div`
+  padding: 28px 20px;
+  border-radius: calc(var(--radius) * 1.8);
+  background: var(--card);
+  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+`
+
+// Every participant now arrives via a coach-issued personal link
+// (/start/:code), which is the only thing that can identify which coach owns
+// them - there's no generic "register here" page to send a bare visit to.
+function NoPersonalLink() {
+  return (
+    <PageShell>
+      <Center>
+        <Card>
+          <PageTitle as="h1">צריך קישור אישי</PageTitle>
+          <Subtle>
+            כדי להשתתף באתגר צריך קישור אישי מהמאמנת שלך. אם עדיין אין לך קישור, אפשר לפנות
+            אליה.
+          </Subtle>
+        </Card>
+      </Center>
+    </PageShell>
+  )
+}
+
 export function RequireParticipant({ children }: { children: ReactNode }) {
   const { participant } = useParticipantState()
 
-  if (!participant) return <Navigate to="/register" replace />
+  if (!participant) return <NoPersonalLink />
 
   return children
 }
