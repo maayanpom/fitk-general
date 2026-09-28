@@ -46,6 +46,11 @@ const Center = styled(PageInner)`
 // Shown at the slug-less /privacy-policy route, so there's always one stable
 // URL that's reachable without a specific coach's link (e.g. for ad-platform
 // review) - attributed to the platform owner rather than a specific coach.
+//
+// public/privacy-policy.html is a hand-written static copy of this same
+// generic content, served directly (bypassing this React page) so the
+// content is visible to crawlers that don't run JavaScript - see vercel.json.
+// Keep both in sync when editing the policy text.
 const PLATFORM_OWNER: CoachPublicInfo = {
   name: "מעיין פאר",
   email: "maayanpom@gmail.com",
@@ -113,10 +118,19 @@ export default function PrivacyPolicyPage() {
 
         <Section>
           <SectionTitle>מי אנחנו</SectionTitle>
-          <Body>
-            האתגר מנוהל על ידי {coach.name}. ליצירת קשר:{" "}
-            <a href={`mailto:${coach.email}`}>{coach.email}</a>.
-          </Body>
+          {slug ? (
+            <Body>
+              האתגר מנוהל על ידי {coach.name}. ליצירת קשר:{" "}
+              <a href={`mailto:${coach.email}`}>{coach.email}</a>.
+            </Body>
+          ) : (
+            <Body>
+              האתגר מופעל על ידי מספר מאמנות ומאמנים באמצעות פלטפורמה משותפת. המאמן/ת ששלח/ה לכם
+              את הקישור לאתגר הוא/היא איש/אשת הקשר שלכם לגבי השתתפותכם. הפלטפורמה, בבעלות{" "}
+              {coach.name} (<a href={`mailto:${coach.email}`}>{coach.email}</a>), מארחת ומעבדת את
+              הנתונים עבור כלל המאמנות/ים.
+            </Body>
+          )}
         </Section>
 
         <Section>

@@ -5,23 +5,9 @@
 alter table public.registrations
   add column if not exists participant_id uuid references public.participants(id);
 
-create or replace function public.link_registration_to_participant(
-  registration_id uuid, participant_id uuid
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  if not public.is_admin() then
-    raise exception 'not authorized';
-  end if;
-
-  update public.registrations set participant_id = link_registration_to_participant.participant_id
-  where id = registration_id;
-end;
-$$;
-
-revoke all on function public.link_registration_to_participant(uuid, uuid) from public;
-grant execute on function public.link_registration_to_participant(uuid, uuid) to authenticated;
+-- link_registration_to_participant used to be defined here, checking only
+-- is_admin() with no per-coach ownership check. It's superseded by a
+-- coach-scoped version in coaches.sql (checks coach_id = auth.uid() on both
+-- the registration and the participant). Do not recreate the old version -
+-- re-running it alone would silently regress that ownership check and let
+-- any coach link any other coach's registration/participant.

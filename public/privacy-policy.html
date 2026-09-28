@@ -1,0 +1,137 @@
+<!--
+  Hand-written static copy of the generic branch of
+  src/pages/PrivacyPolicyPage.tsx (the slug-less /privacy-policy route).
+  Served directly for /privacy-policy (see vercel.json) instead of the SPA
+  shell, so the policy text is present in the raw HTML for crawlers that
+  don't run JavaScript (e.g. Meta's ad reviewer). Keep both in sync when
+  editing the policy text.
+-->
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fbf6ef" />
+    <meta
+      name="description"
+      content="מדיניות הפרטיות של אתגר 3 ימים חוזרים לשגרה - אילו נתונים נאספים, למה, ועם מי משתפים."
+    />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>מדיניות פרטיות</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        padding: 32px 16px 64px;
+        background: #fbf6ef;
+        color: #3a2f28;
+        font-family: "Heebo", system-ui, sans-serif;
+        line-height: 1.7;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.6rem;
+      }
+      .subtle {
+        margin: 0;
+        color: #7a6d61;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+      p {
+        margin: 0;
+      }
+      a {
+        color: #b5622a;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .disclaimer {
+        padding: 16px;
+        border-radius: 14px;
+        background: #f1e6d8;
+      }
+      .disclaimer h2 {
+        margin: 0 0 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>מדיניות פרטיות</h1>
+        <p class="subtle">אתגר "3 ימים חוזרים לשגרה"</p>
+      </header>
+
+      <section>
+        <h2>מי אנחנו</h2>
+        <p>
+          האתגר מופעל על ידי מספר מאמנות ומאמנים באמצעות פלטפורמה משותפת. המאמן/ת ששלח/ה לכם את
+          הקישור לאתגר הוא/היא איש/אשת הקשר שלכם לגבי השתתפותכם. הפלטפורמה, בבעלות מעיין פאר
+          (<a href="mailto:maayanpom@gmail.com">maayanpom@gmail.com</a>), מארחת ומעבדת את הנתונים
+          עבור כלל המאמנות/ים.
+        </p>
+      </section>
+
+      <section>
+        <h2>איזה מידע נאסף</h2>
+        <p>
+          שם מלא, טלפון ומייל (בטופס במודעה), ותשובות שתמלאו בדפי האתגר על שגרת האכילה והיום שלכם.
+          אנא אל תכתבו מידע רפואי. האתגר מיועד לגילאי 18 ומעלה.
+        </p>
+      </section>
+
+      <section>
+        <h2>למה</h2>
+        <p>
+          ליצירת קשר לגבי האתגר, לרישום חינמי לאתר HoldOn (רק לפי אישורכם המפורש), להכנת סיכום
+          אישי ולהזמנה לקהילה.
+        </p>
+      </section>
+
+      <section>
+        <h2>עם מי משתפים</h2>
+        <p>
+          HoldOn (שם, טלפון ומייל, רק לאחר אישורכם), Supabase (שירות אחסון הנתונים, שרתים
+          ב-ap-southeast-2), Meta (איסוף הטופס) ו-WhatsApp (תקשורת). לא מוכרים מידע.
+        </p>
+      </section>
+
+      <section>
+        <h2>כמה זמן שומרים</h2>
+        <p>עד 3 חודשים מסיום הפעילות שלכם באתגר, או עד בקשת מחיקה.</p>
+      </section>
+
+      <section>
+        <h2>הזכויות שלכם</h2>
+        <p>
+          לעיין, לתקן, למחוק ולבטל הסכמה בכל עת, בפנייה ל-
+          <a href="mailto:maayanpom@gmail.com">maayanpom@gmail.com</a>.
+        </p>
+      </section>
+
+      <section class="disclaimer">
+        <h2>חשוב</h2>
+        <p>האתגר הוא תוכן חינוכי ואינו ייעוץ רפואי או תזונתי.</p>
+      </section>
+    </main>
+  </body>
+</html>
