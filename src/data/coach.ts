@@ -75,9 +75,22 @@ export async function signUpCoach(params: {
 
 // The signed-in coach's own profile, or null if this account has none yet
 // (an edge case - e.g. signup partly failed).
+//
+// Filters explicitly by the caller's own id rather than relying on RLS alone:
+// a super admin can see every coach's row (a separate, permissive policy for
+// the oversight list), so an unfiltered query would return multiple rows for
+// that account and make .maybeSingle() throw.
 export async function fetchOwnCoach(): Promise<Coach | null> {
   if (!supabase) return null
-  const { data, error } = await supabase.from("coaches").select("*").maybeSingle()
+  const { data: userData, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  if (!userData.user) return null
+
+  const { data, error } = await supabase
+    .from("coaches")
+    .select("*")
+    .eq("id", userData.user.id)
+    .maybeSingle()
   if (error) throw error
   return data ? fromRow(data as CoachRow) : null
 }
