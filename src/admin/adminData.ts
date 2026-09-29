@@ -38,13 +38,25 @@ export async function fetchParticipants(): Promise<Participant[]> {
   return (data as ParticipantRow[]).map(fromRow)
 }
 
+export type LeadSource = "community" | "meta_ad" | "manual"
+
+export const SOURCE_LABELS: Record<LeadSource, string> = {
+  community: "קהילה",
+  meta_ad: "מודעה",
+  manual: "ידני",
+}
+
 export type Registration = {
   id: string
   fullName: string
   phone: string
   email: string
-  consentPrivacy: boolean
-  consentHoldon: boolean
+  source: LeadSource
+  consentPrivacyAt: string | null
+  consentMessagesAt: string | null
+  consentHoldonAt: string | null
+  holdonRegisteredAt: string | null
+  importBatch: string | null
   participantId: string | null
   createdAt: string
 }
@@ -54,8 +66,12 @@ type RegistrationRow = {
   full_name: string
   phone: string
   email: string
-  consent_privacy: boolean
-  consent_holdon: boolean
+  source: LeadSource
+  consent_privacy_at: string | null
+  consent_messages_at: string | null
+  consent_holdon_at: string | null
+  holdon_registered_at: string | null
+  import_batch: string | null
   participant_id: string | null
   created_at: string
 }
@@ -72,48 +88,101 @@ export async function fetchRegistrations(): Promise<Registration[]> {
     fullName: row.full_name,
     phone: row.phone,
     email: row.email,
-    consentPrivacy: row.consent_privacy,
-    consentHoldon: row.consent_holdon,
+    source: row.source,
+    consentPrivacyAt: row.consent_privacy_at,
+    consentMessagesAt: row.consent_messages_at,
+    consentHoldonAt: row.consent_holdon_at,
+    holdonRegisteredAt: row.holdon_registered_at,
+    importBatch: row.import_batch,
     participantId: row.participant_id,
     createdAt: row.created_at,
   }))
 }
 
-// Marks a registration (lead) as converted into a participant, so the admin
-// UI can stop it being converted a second time.
-export async function linkRegistrationToParticipant(
-  registrationId: string,
-  participantId: string,
-): Promise<void> {
+export type NewLead = { full_name: string; phone: string; email: string }
+
+// Manual add (5.2) and Meta CSV import (5.3). One consent confirmation covers
+// the whole call; the server dedupes by phone and email and normalizes phones.
+export async function addRegistrations(
+  rows: NewLead[],
+  source: "manual" | "meta_ad",
+  batch: string,
+): Promise<{ inserted: number; skippedDuplicates: number }> {
   if (!supabase) throw new Error("Supabase is not connected")
-  const { error } = await supabase.rpc("link_registration_to_participant", {
-    registration_id: registrationId,
-    participant_id: participantId,
+  const { data, error } = await supabase.rpc("coach_add_registrations", {
+    p_rows: rows,
+    p_source: source,
+    p_batch: batch,
+    p_consent_confirmed: true,
+  })
+  if (error) throw error
+  const d = data as { inserted: number; skipped_duplicates: number }
+  return { inserted: d.inserted, skippedDuplicates: d.skipped_duplicates }
+}
+
+// 5.4: the HoldOn registration status button.
+export async function setHoldonRegistered(registrationId: string, registered: boolean) {
+  if (!supabase) throw new Error("Supabase is not connected")
+  const { error } = await supabase.rpc("set_holdon_registered", {
+    p_registration: registrationId,
+    p_registered: registered,
   })
   if (error) throw error
 }
 
-// Creates a new participant (coach-registered) and returns their id, for
-// building the personal /start/:code link. Reuses the same RPC participants
-// use to save their own answers - the admin session is also `authenticated`,
-// which upsert_participant already grants execute to.
-export async function createParticipant(firstName: string): Promise<string> {
+// 5.5: creates the personal code (the participant id) for a registration.
+// The server refuses when HoldOn consent is required and missing.
+export async function createParticipantForRegistration(registrationId: string): Promise<string> {
   if (!supabase) throw new Error("Supabase is not connected")
-  const id = crypto.randomUUID()
-  const now = new Date().toISOString()
-  const { error } = await supabase.rpc("upsert_participant", {
-    p: {
-      participantId: id,
-      firstName: firstName.trim(),
-      day1: {},
-      day2: {},
-      day3: {},
-      toolbox: {},
-      createdAt: now,
-    },
+  const { data, error } = await supabase.rpc("create_participant_for_registration", {
+    p_registration: registrationId,
   })
   if (error) throw error
-  return id
+  return data as string
+}
+
+// 5.8: deletes the person, every answer and the summary.
+export async function deletePerson(registrationId: string | null, participantId: string | null) {
+  if (!supabase) throw new Error("Supabase is not connected")
+  const { error } = await supabase.rpc("coach_delete_person", {
+    p_registration: registrationId,
+    p_participant: participantId,
+  })
+  if (error) throw error
+}
+
+export type SummaryRow = {
+  participantId: string
+  draft: string
+  sentAt: string | null
+}
+
+export async function fetchSummaries(): Promise<SummaryRow[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase.from("summaries").select("participant_id, draft, sent_at")
+  if (error) throw error
+  return (data as { participant_id: string; draft: string; sent_at: string | null }[]).map((r) => ({
+    participantId: r.participant_id,
+    draft: r.draft,
+    sentAt: r.sent_at,
+  }))
+}
+
+export async function saveSummary(
+  coachId: string,
+  participantId: string,
+  draft: string,
+  sentAt: string | null,
+) {
+  if (!supabase) throw new Error("Supabase is not connected")
+  const { error } = await supabase.from("summaries").upsert({
+    participant_id: participantId,
+    coach_id: coachId,
+    draft,
+    sent_at: sentAt,
+    updated_at: new Date().toISOString(),
+  })
+  if (error) throw error
 }
 
 const dateTime = new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short" })

@@ -25,7 +25,7 @@ const Panel = styled.div`
   padding: 8px;
   border-radius: 18px;
   background: var(--card);
-  box-shadow: 0 6px 20px -14px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 6px 20px -14px oklch(0.3 0.06 300 / 0.35);
 `
 
 const ErrorText = styled.p`

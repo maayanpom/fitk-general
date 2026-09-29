@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 const Wrap = styled(Card)`
   padding: 16px;
   gap: 14px;
-  box-shadow: 0 1px 2px oklch(0.4 0.05 50 / 0.06), 0 6px 18px -10px oklch(0.4 0.05 50 / 0.18);
+  box-shadow: 0 1px 2px oklch(0.3 0.06 300 / 0.06), 0 6px 18px -10px oklch(0.3 0.06 300 / 0.18);
 `
 
 const Header = styled.div`

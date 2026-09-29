@@ -7,7 +7,7 @@ export type Day2Feedback = {
 
 const TITLE = "התובנה שלכם מהצלחת"
 
-// One message, by priority: protein first, then vegetables/fruit, then carbs
+// One message, by priority: protein first, then vegetables, then carbs
 // - fat doesn't affect the outcome. "יש הכול"/nothing-checked are the two
 // remaining edge cases.
 export function getDay2Feedback({ protein, vegetables, carbs, fat }: Day2Data): Day2Feedback {
@@ -17,19 +17,19 @@ export function getDay2Feedback({ protein, vegetables, carbs, fat }: Day2Data): 
   if (!protein) {
     return {
       title: TITLE,
-      body: "בצלחת הזו לא סימנתם מקור חלבון. הוספה קטנה, למשל ביצה, גבינה או קטניות, יכולה לעזור לארוחה להחזיק יותר זמן.",
+      body: "בצלחת הזו לא סימנתם מקור חלבון. הוספה קטנה, למשל ביצים, קוטג', יוגורט או טונה, יכולה לעזור לארוחה להחזיק יותר זמן.",
     }
   }
   if (!vegetables) {
     return {
       title: TITLE,
-      body: "לא סימנתם ירקות או פרי. כמה חתיכות בצד מספיקות כדי להתחיל.",
+      body: "לא סימנתם ירקות. כמה חתיכות בצד מספיקות כדי להתחיל.",
     }
   }
   if (!carbs) {
     return {
       title: TITLE,
-      body: "לא סימנתם מקור פחמימה. פחמימה היא חלק רגיל מהצלחת והיא נותנת אנרגיה. אין צורך לוותר עליה.",
+      body: "לא סימנתם מקור פחמימה. פחמימה היא חלק רגיל מהצלחת והיא נותנת אנרגיה. פרוסת לחם או פרי הן דוגמאות פשוטות, ואין צורך לוותר עליה.",
     }
   }
   return { title: TITLE, body: "יש לכם בצלחת שילוב מגוון. יפה." }

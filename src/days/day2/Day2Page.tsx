@@ -1,16 +1,19 @@
 import { Check } from "lucide-react"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
+import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
+import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
 import { DoneButton } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
+import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { Day2MealChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
+import day2Image from "@/assets/day2.jpg"
 import { MEAL_OPTIONS } from "./content"
 import { getDay2Feedback } from "./feedback"
 
@@ -18,8 +21,8 @@ type PlateComponent = "protein" | "vegetables" | "carbs" | "fat"
 
 const COMPONENTS: { key: PlateComponent; emoji: string; title: string; examples: string }[] = [
   { key: "protein", emoji: "🍗", title: "מקור חלבון", examples: "עוף, דג, בשר, ביצים, גבינות, טופו, קטניות" },
-  { key: "vegetables", emoji: "🥗", title: "ירקות או פרי", examples: "סלט, ירקות מבושלים, פרי" },
-  { key: "carbs", emoji: "🍞", title: "מקור פחמימה", examples: "לחם, אורז, תפוח אדמה, פסטה, דגנים, קטניות" },
+  { key: "vegetables", emoji: "🥗", title: "ירקות", examples: "סלט, ירקות מבושלים" },
+  { key: "carbs", emoji: "🍞", title: "מקור פחמימה", examples: "לחם, אורז, תפוח אדמה, פסטה, דגנים, קטניות, פרי" },
   { key: "fat", emoji: "🥑", title: "מקור שומן לפי הצורך", examples: "אבוקדו, טחינה, שמן זית, אגוזים" },
 ]
 
@@ -27,36 +30,6 @@ const Section = styled.section`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`
-
-const Options = styled(RadioGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`
-
-const Pill = styled.label`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1.5px solid var(--border);
-  background: var(--card);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-
-  &:has([data-state="checked"]) {
-    border-color: var(--primary);
-    background: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  &:has(:focus-visible) {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
 `
 
 const Grid = styled.div`
@@ -100,7 +73,7 @@ const PlateCard = styled.button<{ $checked: boolean }>`
   }
 
   small {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     line-height: 1.5;
     color: var(--muted-foreground);
   }
@@ -127,8 +100,8 @@ const Notes = styled.ul`
   flex-direction: column;
   gap: 4px;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.7;
 `
 
 const Tip = styled.p`
@@ -137,8 +110,8 @@ const Tip = styled.p`
   border-radius: calc(var(--radius) * 1.2);
   background: var(--secondary);
   color: var(--secondary-foreground);
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.7;
 `
 
 const Extras = styled.div`
@@ -147,12 +120,6 @@ const Extras = styled.div`
   align-items: center;
   gap: 10px;
   text-align: center;
-`
-
-const ProgressLine = styled.p`
-  margin: 0;
-  font-weight: 600;
-  color: var(--primary);
 `
 
 const Teaser = styled.p`
@@ -171,35 +138,35 @@ export default function Day2Page() {
     <PageShell>
       <PageInner>
         <DayHeader
-          eyebrow="יום 2"
+          day={2}
+          image={day2Image}
           title="הצלחת שלי"
           lead="היום מסתכלים על ארוחה אחת כמו שהיא באמת, בלי לשפוט."
         />
 
-        <Section>
-          <SectionTitle>מה זו צלחת מאוזנת?</SectionTitle>
+        <WhyItMatters title="למה זה חשוב: מה זו צלחת מאוזנת?">
           <Subtle style={{ margin: 0 }}>
-            צלחת מאוזנת היא לא כלל נוקשה אלא כיוון: מקור חלבון, ירקות או פרי, מקור פחמימה וקצת
-            שומן. כך קל יותר להרגיש שבעים לאורך זמן. לא צריך שהכול יופיע בכל ארוחה. המטרה היא
-            להבין מה בדרך כלל יש בצלחת, ומה בדרך כלל חסר.
+            צלחת מאוזנת היא כלי חשוב לשמירה על אורח חיים בריא: מקור חלבון, ירקות, מקור פחמימה
+            ושומן במידת הצורך. כך אנחנו רגועים שאנחנו יודעים שנתנו לגוף מה שהוא צריך, וקל לנו
+            יותר להרגיש שבעים לאורך זמן. המטרה היא להבין מה בדרך כלל יש בצלחת, ומה בדרך כלל
+            חסר.
           </Subtle>
-        </Section>
+        </WhyItMatters>
 
         <Section>
           <SectionTitle>בחרו ארוחה אחת</SectionTitle>
           <Subtle style={{ margin: 0 }}>בחרו ארוחה אחת מהיום או מאתמול, והסתכלו עליה בכנות.</Subtle>
-          <Options
+          <ChoiceGroup
             value={data.mealChosen}
             onValueChange={(v) => updateSection("day2", { mealChosen: v as Day2MealChoice })}
             aria-label="בחרו ארוחה אחת"
           >
             {MEAL_OPTIONS.map((option) => (
-              <Pill key={option.value}>
-                <RadioGroupItem value={option.value} />
+              <ChoicePill key={option.value} value={option.value}>
                 {option.label}
-              </Pill>
+              </ChoicePill>
             ))}
-          </Options>
+          </ChoiceGroup>
         </Section>
 
         <Section>
@@ -226,15 +193,12 @@ export default function Day2Page() {
               </PlateCard>
             ))}
           </Grid>
-          <Subtle style={{ margin: 0 }}>
-            קטניות (חומוס, עדשים, שעועית) אפשר לסמן גם כחלבון וגם כפחמימה.
-          </Subtle>
         </Section>
 
         <Section>
           <SectionTitle>איך משלימים צלחת בלי מאמץ</SectionTitle>
           <Notes>
-            <li>חסר חלבון? ביצה, גבינה, יוגורט, טונה או קטניות מספיקים.</li>
+            <li>חסר חלבון? ביצים, קוטג', יוגורט, טונה מספיקים.</li>
             <li>חסרים ירקות? מלפפון או עגבנייה חתוכים בצד, גם בלי לבשל.</li>
             <li>חסרה פחמימה? פרוסת לחם או פרי. אין צורך לוותר עליה.</li>
           </Notes>
@@ -242,7 +206,9 @@ export default function Day2Page() {
 
         <Tip>🍽️ ארוחה מהירה או מוכנה היא גם ארוחה. מספיק להשלים בה מרכיב אחד.</Tip>
 
-        <DoneButton onClick={() => void complete()}>סיימתי ✓</DoneButton>
+        <DoneButton disabled={!data.mealChosen} onClick={() => void complete()}>
+          סיימתי ✓
+        </DoneButton>
 
         <ResultArea ref={resultRef}>
           {isCompleted && (
@@ -251,7 +217,7 @@ export default function Day2Page() {
               <CompletionMessage />
               <Extras>
                 <Subtle style={{ margin: 0 }}>אין צורך שכל ארוחה תהיה מושלמת.</Subtle>
-                <ProgressLine>הפרופיל שלכם: 66%</ProgressLine>
+                <CompletionProgress percent={66} />
                 <Teaser>מחר: הפתרון שלי. נבחר רגע אחד ונמצא לו פתרון קטן.</Teaser>
               </Extras>
             </>

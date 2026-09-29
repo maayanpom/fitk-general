@@ -1,26 +1,30 @@
 import styled from "styled-components"
-import { Eyebrow, PageTitle } from "@/components/layout/PageShell"
+import { HeroImage } from "./HeroImage"
+import { ProgressBar } from "./ProgressBar"
 
 const Lead = styled.p`
-  margin: 10px 0 0;
+  margin: 14px 0 0;
   font-size: 1.05rem;
   font-weight: 500;
-  line-height: 1.55;
+  line-height: 1.7;
   color: var(--secondary-foreground);
 `
 
 type Props = {
-  eyebrow: string
+  day: 1 | 2 | 3
+  image: string
   title: string
   lead?: string
 }
 
-export function DayHeader({ eyebrow, title, lead }: Props) {
+export function DayHeader({ day, image, title, lead }: Props) {
   return (
-    <header>
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <PageTitle>{title}</PageTitle>
-      {lead && <Lead>{lead}</Lead>}
-    </header>
+    <>
+      <ProgressBar day={day} />
+      <div>
+        <HeroImage image={image} badge={day} title={title} />
+        {lead && <Lead>{lead}</Lead>}
+      </div>
+    </>
   )
 }

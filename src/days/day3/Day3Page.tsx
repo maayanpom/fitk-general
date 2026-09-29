@@ -1,29 +1,24 @@
-import { useEffect } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
+import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
+import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
 import { DoneButton } from "@/components/challenge/DoneButton"
 import { CommunityInvite } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
+import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { Day3HappensChoice, Day3HelpChoice, Day3MomentChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
-import {
-  day2MissingLabel,
-  EXPERIMENTS,
-  HAPPENS_OPTIONS,
-  HELP_OPTIONS,
-  momentChoiceFromDay1,
-  MOMENT_OPTIONS,
-} from "./content"
+import day3Image from "@/assets/day3.jpg"
+import { day2MissingLabel, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "./content"
 import { getDay1Feedback } from "../day1/feedback"
 
 const Section = styled.section`
@@ -54,36 +49,6 @@ const QuestionLabel = styled(Label)`
   line-height: 1.5;
 `
 
-const Options = styled(RadioGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`
-
-const Pill = styled.label`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1.5px solid var(--border);
-  background: var(--card);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-
-  &:has([data-state="checked"]) {
-    border-color: var(--primary);
-    background: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  &:has(:focus-visible) {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-`
-
 const QuestionCard = styled.div`
   display: flex;
   flex-direction: column;
@@ -91,7 +56,7 @@ const QuestionCard = styled.div`
   padding: 16px;
   border-radius: calc(var(--radius) * 1.4);
   background: var(--card);
-  box-shadow: 0 1px 2px oklch(0.4 0.05 50 / 0.06), 0 6px 18px -10px oklch(0.4 0.05 50 / 0.18);
+  box-shadow: 0 1px 2px oklch(0.3 0.06 300 / 0.06), 0 6px 18px -10px oklch(0.3 0.06 300 / 0.18);
 `
 
 const Notes = styled.ul`
@@ -101,8 +66,8 @@ const Notes = styled.ul`
   flex-direction: column;
   gap: 4px;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.7;
 `
 
 const Summary = styled.ul`
@@ -120,7 +85,7 @@ const Celebration = styled.section`
   gap: 14px;
   padding: 26px 20px;
   border-radius: calc(var(--radius) * 1.8);
-  background: linear-gradient(160deg, oklch(0.94 0.05 70), oklch(0.9 0.06 40));
+  background: linear-gradient(160deg, #EDE4FA, #D8C9F0);
   text-align: center;
 
   h2 {
@@ -143,47 +108,29 @@ const Celebration = styled.section`
   }
 `
 
-const ProgressLine = styled.p`
-  margin: 0;
-  font-weight: 600;
-  color: var(--primary);
-  text-align: center;
-`
-
 export default function Day3Page() {
   const { participant, updateSection } = useParticipant()
   const { isCompleted, complete, resultRef } = useCompletion("day3")
   const coach = useCoachPublicInfo(participant.coachSlug)
   const data = participant.day3
 
-  // Pre-selects question 1 from day 1's hard point, once, if nothing was
-  // chosen yet - the participant can still change it afterward.
-  useEffect(() => {
-    if (data.momentChoice) return
-    const fromDay1 = momentChoiceFromDay1(participant.day1.hardestMoment)
-    if (fromDay1) updateSection("day3", { momentChoice: fromDay1 })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const effectiveExperiment = data.experimentChoice || data.helpChoice
-
   return (
     <PageShell>
       <PageInner>
         <DayHeader
-          eyebrow="יום 3"
+          day={3}
+          image={day3Image}
           title="הפתרון שלי"
           lead="היום בוחרים רגע אחד קשה, ומוצאים לו פתרון קטן שמתאים לחיים האמיתיים."
         />
 
-        <Section>
-          <SectionTitle>למה דווקא הרגע הזה?</SectionTitle>
+        <WhyItMatters>
           <Subtle style={{ margin: 0 }}>
             לעיתים קרובות הקושי באוכל קשור לרגע ולא לכוח רצון: מתי אנחנו עייפים, רעבים או לחוצים,
             ומה זמין לנו באותו רגע. כשמבינים מה קורה ברגע הזה, אפשר לשנות דבר קטן אחד במקום לשנות
             הכול.
           </Subtle>
-        </Section>
+        </WhyItMatters>
 
         <Section>
           <SectionTitle>שלוש בחירות לרגע אחד</SectionTitle>
@@ -193,18 +140,17 @@ export default function Day3Page() {
               <StepNumber aria-hidden>1</StepNumber>
               הרגע ביום שבו הכי קשה לי לאכול כמו שהייתי רוצה:
             </QuestionLabel>
-            <Options
+            <ChoiceGroup
               value={data.momentChoice}
               onValueChange={(v) => updateSection("day3", { momentChoice: v as Day3MomentChoice })}
               aria-label="הרגע ביום שבו הכי קשה לי לאכול כמו שהייתי רוצה"
             >
               {MOMENT_OPTIONS.map((o) => (
-                <Pill key={o.value}>
-                  <RadioGroupItem value={o.value} />
+                <ChoicePill key={o.value} value={o.value}>
                   {o.label}
-                </Pill>
+                </ChoicePill>
               ))}
-            </Options>
+            </ChoiceGroup>
           </QuestionCard>
 
           <QuestionCard>
@@ -212,7 +158,7 @@ export default function Day3Page() {
               <StepNumber aria-hidden>2</StepNumber>
               כשזה קורה, בדרך כלל אני:
             </QuestionLabel>
-            <Options
+            <ChoiceGroup
               value={data.happensChoice}
               onValueChange={(v) =>
                 updateSection("day3", { happensChoice: v as Day3HappensChoice })
@@ -220,12 +166,11 @@ export default function Day3Page() {
               aria-label="כשזה קורה, בדרך כלל אני"
             >
               {HAPPENS_OPTIONS.map((o) => (
-                <Pill key={o.value}>
-                  <RadioGroupItem value={o.value} />
+                <ChoicePill key={o.value} value={o.value}>
                   {o.label}
-                </Pill>
+                </ChoicePill>
               ))}
-            </Options>
+            </ChoiceGroup>
           </QuestionCard>
 
           <QuestionCard>
@@ -233,18 +178,17 @@ export default function Day3Page() {
               <StepNumber aria-hidden>3</StepNumber>
               מה היה עוזר לי ברגע הזה:
             </QuestionLabel>
-            <Options
+            <ChoiceGroup
               value={data.helpChoice}
               onValueChange={(v) => updateSection("day3", { helpChoice: v as Day3HelpChoice })}
               aria-label="מה היה עוזר לי ברגע הזה"
             >
               {HELP_OPTIONS.map((o) => (
-                <Pill key={o.value}>
-                  <RadioGroupItem value={o.value} />
+                <ChoicePill key={o.value} value={o.value}>
                   {o.label}
-                </Pill>
+                </ChoicePill>
               ))}
-            </Options>
+            </ChoiceGroup>
           </QuestionCard>
 
           <QuestionCard>
@@ -257,28 +201,6 @@ export default function Day3Page() {
             />
             <Subtle style={{ margin: 0 }}>לא צריך לכתוב מידע רפואי.</Subtle>
           </QuestionCard>
-        </Section>
-
-        <Section>
-          <SectionTitle>הניסוי שלי לשבוע</SectionTitle>
-          <Subtle style={{ margin: 0 }}>
-            הצענו ניסוי לפי מה שסימנתם למעלה - אפשר להשאיר אותו ככה, או לבחור ניסוי אחר.
-          </Subtle>
-          <Options
-            value={effectiveExperiment}
-            onValueChange={(v) => updateSection("day3", { experimentChoice: v as Day3HelpChoice })}
-            aria-label="הניסוי שלי לשבוע"
-          >
-            {HELP_OPTIONS.map((o) => (
-              <Pill key={o.value}>
-                <RadioGroupItem value={o.value} />
-                {o.label}
-              </Pill>
-            ))}
-          </Options>
-          {effectiveExperiment && (
-            <Subtle style={{ margin: 0 }}>"{EXPERIMENTS[effectiveExperiment]}"</Subtle>
-          )}
         </Section>
 
         <Section>
@@ -302,7 +224,7 @@ export default function Day3Page() {
               <QuestionCard>
                 <SectionTitle>הסיכום שלכם</SectionTitle>
                 <Summary>
-                  <li>מיום 1: {getDay1Feedback(participant.day1).body}</li>
+                  <li>מיום 1: {getDay1Feedback(participant.day1, coach?.longGapHours).body}</li>
                   <li>מיום 2: בצלחת שבדקתם חסר בדרך כלל: {day2MissingLabel(participant.day2)}.</li>
                   <li>
                     מיום 3: הרגע הקשה הוא{" "}
@@ -310,9 +232,8 @@ export default function Day3Page() {
                     שיעזור לכם:{" "}
                     {HELP_OPTIONS.find((o) => o.value === data.helpChoice)?.label ?? "-"}.
                   </li>
-                  <li>הניסוי שלי לשבוע: {effectiveExperiment ? EXPERIMENTS[effectiveExperiment] : "-"}</li>
                 </Summary>
-                <ProgressLine>הפרופיל שלכם: 100%</ProgressLine>
+                <CompletionProgress percent={100} />
               </QuestionCard>
 
               <CompletionMessage />

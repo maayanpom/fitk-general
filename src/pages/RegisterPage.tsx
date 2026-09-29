@@ -22,7 +22,7 @@ const Card = styled.div`
   padding: 28px 20px;
   border-radius: calc(var(--radius) * 1.8);
   background: var(--card);
-  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 12px 32px -18px oklch(0.3 0.06 300 / 0.35);
 `
 
 const Field = styled.div`
@@ -61,6 +61,15 @@ const ConsentRow = styled.label`
   }
 `
 
+const Honeypot = styled.div`
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+`
+
 const ErrorText = styled.p`
   margin: 0;
   color: var(--destructive);
@@ -93,7 +102,9 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [consentPrivacy, setConsentPrivacy] = useState(false)
+  const [consentMessages, setConsentMessages] = useState(false)
   const [consentHoldon, setConsentHoldon] = useState(false)
+  const [website, setWebsite] = useState("") // honeypot, must stay empty
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [done, setDone] = useState(false)
@@ -122,8 +133,15 @@ export default function RegisterPage() {
       : 'הרשמה – אתגר "3 ימים חוזרים לשגרה"'
   }, [coach])
 
+  const holdonRequired = coach?.requireHoldonConsent ?? true
   const canSubmit =
-    name.trim() && phone.trim() && email.trim() && consentPrivacy && consentHoldon && !submitting
+    name.trim() &&
+    phone.trim() &&
+    email.trim() &&
+    consentPrivacy &&
+    consentMessages &&
+    (consentHoldon || !holdonRequired) &&
+    !submitting
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -143,7 +161,9 @@ export default function RegisterPage() {
       phone: phone.trim(),
       email: email.trim(),
       consent_privacy: consentPrivacy,
+      consent_messages: consentMessages,
       consent_holdon: consentHoldon,
+      website,
     })
 
     if (error) {
@@ -185,7 +205,7 @@ export default function RegisterPage() {
         <Center>
           <ThankYou>
             <PartyPopper size={40} />
-            <PageTitle as="h1">תודה שנרשמתם!</PageTitle>
+            <PageTitle as="h1">נרשמתם!</PageTitle>
             <p>נחזור אליכם בוואטסאפ.</p>
           </ThankYou>
         </Center>
@@ -199,8 +219,13 @@ export default function RegisterPage() {
         <Card as="form" onSubmit={(e) => void submit(e)}>
           <header>
             <PageTitle>הרשמה לאתגר</PageTitle>
-            <Subtle>של {coach.name} · "3 ימים חוזרים לשגרה"</Subtle>
+            <Subtle>האתגר של {coach.name}: 3 ימים חוזרים לשגרה</Subtle>
           </header>
+
+          <Subtle>
+            האתגר בשיתוף HoldOn. ההשתתפות מותנית ברישום חינמי לאתר HoldOn, שיבוצע עבורכם על ידי{" "}
+            {coach.name} לאחר אישורכם.
+          </Subtle>
 
           <Field>
             <Label htmlFor="reg-name">שם מלא</Label>
@@ -236,14 +261,41 @@ export default function RegisterPage() {
             />
           </Field>
 
+          <Honeypot aria-hidden="true">
+            <label htmlFor="reg-website">אתר</label>
+            <input
+              id="reg-website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+          </Honeypot>
+
           <ConsentRow>
             <Checkbox
               checked={consentPrivacy}
               onCheckedChange={(v) => setConsentPrivacy(v === true)}
             />
             <span>
-              קראתי ואני מסכים/ה ל<Link to={`/${slug}/privacy-policy`}>מדיניות הפרטיות</Link>.
+              קראתי את{" "}
+              {coach.privacyUrl ? (
+                <a href={coach.privacyUrl} target="_blank" rel="noopener noreferrer">
+                  מדיניות הפרטיות
+                </a>
+              ) : (
+                <Link to={`/${slug}/privacy-policy`}>מדיניות הפרטיות</Link>
+              )}{" "}
+              והסכמתי לה, ואני מעל גיל 18.
             </span>
+          </ConsentRow>
+
+          <ConsentRow>
+            <Checkbox
+              checked={consentMessages}
+              onCheckedChange={(v) => setConsentMessages(v === true)}
+            />
+            <span>הסכמתי לקבל הודעות בוואטסאפ ובמייל בנוגע לאתגר.</span>
           </ConsentRow>
 
           <ConsentRow>
@@ -251,13 +303,13 @@ export default function RegisterPage() {
               checked={consentHoldon}
               onCheckedChange={(v) => setConsentHoldon(v === true)}
             />
-            <span>אני מאשר/ת להעביר את פרטיי (שם, טלפון ומייל) ל-HoldOn לצורך רישום חינמי.</span>
+            <span>הסכמתי להעביר את פרטיי (שם, טלפון ומייל) ל-HoldOn לצורך רישום חינמי לאתר.</span>
           </ConsentRow>
 
           {error && <ErrorText>{error}</ErrorText>}
 
           <DoneButton type="submit" disabled={!canSubmit}>
-            {submitting ? "שולחים..." : "נרשמים →"}
+            {submitting ? "שולחים..." : "נרשמים"}
           </DoneButton>
         </Card>
       </Center>

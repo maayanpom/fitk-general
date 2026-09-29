@@ -8,6 +8,11 @@ export type Coach = {
   communityUrl: string | null
   slug: string
   createdAt: string
+  privacyUrl: string | null
+  couponText: string | null
+  summaryDeliveryText: string | null
+  longGapHours: number
+  requireHoldonConsent: boolean
 }
 
 type CoachRow = {
@@ -18,6 +23,11 @@ type CoachRow = {
   community_url: string | null
   slug: string
   created_at: string
+  privacy_url: string | null
+  coupon_text: string | null
+  summary_delivery_text: string | null
+  long_gap_hours: number | null
+  require_holdon_consent: boolean | null
 }
 
 function fromRow(row: CoachRow): Coach {
@@ -29,6 +39,11 @@ function fromRow(row: CoachRow): Coach {
     communityUrl: row.community_url,
     slug: row.slug,
     createdAt: row.created_at,
+    privacyUrl: row.privacy_url ?? null,
+    couponText: row.coupon_text ?? null,
+    summaryDeliveryText: row.summary_delivery_text ?? null,
+    longGapHours: row.long_gap_hours ?? 5,
+    requireHoldonConsent: row.require_holdon_consent ?? true,
   }
 }
 
@@ -110,10 +125,33 @@ export async function isSlugTaken(slug: string): Promise<boolean> {
 
 export async function updateOwnCoach(
   id: string,
-  patch: Partial<Pick<Coach, "name" | "phone" | "communityUrl" | "slug">>,
+  patch: Partial<
+    Pick<
+      Coach,
+      | "name"
+      | "phone"
+      | "communityUrl"
+      | "slug"
+      | "privacyUrl"
+      | "couponText"
+      | "summaryDeliveryText"
+      | "longGapHours"
+      | "requireHoldonConsent"
+    >
+  >,
 ): Promise<void> {
   if (!supabase) throw new Error("Supabase is not connected")
-  const update: Record<string, string | null> = {}
+  const update: Record<string, string | number | boolean | null> = {}
+  const optionalText = (v: string | null | undefined) => (v ? v.trim() || null : null)
+  if (patch.privacyUrl !== undefined) update.privacy_url = optionalText(patch.privacyUrl)
+  if (patch.couponText !== undefined) update.coupon_text = optionalText(patch.couponText)
+  if (patch.summaryDeliveryText !== undefined) {
+    update.summary_delivery_text = optionalText(patch.summaryDeliveryText)
+  }
+  if (patch.longGapHours !== undefined) update.long_gap_hours = patch.longGapHours
+  if (patch.requireHoldonConsent !== undefined) {
+    update.require_holdon_consent = patch.requireHoldonConsent
+  }
   if (patch.name !== undefined) update.name = patch.name.trim()
   if (patch.phone !== undefined) update.phone = patch.phone.trim()
   if (patch.communityUrl !== undefined) {
@@ -183,6 +221,9 @@ export type CoachPublicInfo = {
   phone: string
   communityUrl: string | null
   slug: string
+  privacyUrl: string | null
+  requireHoldonConsent: boolean
+  longGapHours: number
 }
 
 function publicFromJson(data: unknown): CoachPublicInfo | null {
@@ -194,6 +235,9 @@ function publicFromJson(data: unknown): CoachPublicInfo | null {
     phone: String(d.phone ?? ""),
     communityUrl: (d.community_url as string | null) ?? null,
     slug: String(d.slug ?? ""),
+    privacyUrl: (d.privacy_url as string | null) ?? null,
+    requireHoldonConsent: d.require_holdon_consent !== false,
+    longGapHours: typeof d.long_gap_hours === "number" ? d.long_gap_hours : 5,
   }
 }
 

@@ -21,7 +21,7 @@ const ErrorCard = styled.div`
   padding: 28px 20px;
   border-radius: calc(var(--radius) * 1.8);
   background: var(--card);
-  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 12px 32px -18px oklch(0.3 0.06 300 / 0.35);
 
 `
 
@@ -56,7 +56,7 @@ export default function StartPage() {
           <ErrorCard>
             <PageTitle as="h1">הקישור אינו תקין</PageTitle>
             <Subtle>
-              ייתכן שהקישור הועתק בטעות. יש לפנות למאמן/ת שקישר/ה אליכם כדי לקבל קישור חדש.
+              ייתכן שהקישור הועתק בטעות. יש לפנות למי ששלח לכם את הקישור כדי לקבל קישור חדש.
             </Subtle>
           </ErrorCard>
         </Center>

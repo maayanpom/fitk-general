@@ -22,7 +22,7 @@ const Card = styled.div`
   padding: 28px 20px;
   border-radius: calc(var(--radius) * 1.8);
   background: var(--card);
-  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 12px 32px -18px oklch(0.3 0.06 300 / 0.35);
 `
 
 const Field = styled.div`
@@ -80,7 +80,7 @@ export default function CoachSignupPage() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    document.title = "הרשמה כמאמן/ת"
+    document.title = "הרשמה להפעלת האתגר"
   }, [])
 
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function CoachSignupPage() {
       <Center>
         <Card as="form" onSubmit={(e) => void submit(e)}>
           <header>
-            <PageTitle>הרשמה כמאמן/ת</PageTitle>
+            <PageTitle>הרשמה להפעלת האתגר</PageTitle>
             <Subtle>פותחים את החשבון שלך לניהול האתגר</Subtle>
           </header>
 

@@ -4,15 +4,19 @@ import styled from "styled-components"
 const Wrap = styled.section`
   padding: 20px 18px;
   border-radius: calc(var(--radius) * 1.4);
-  background: var(--card);
+  background: var(--selected);
   border: 1.5px solid var(--primary);
-  box-shadow: 0 8px 24px -14px oklch(0.55 0.12 35 / 0.45);
-  animation: rise 0.35s ease-out;
+  box-shadow: 0 8px 24px -14px oklch(0.35 0.08 300 / 0.45);
+  animation: rise 0.45s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(12px) scale(0.97);
     }
   }
 `

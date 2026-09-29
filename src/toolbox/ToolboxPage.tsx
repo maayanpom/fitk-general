@@ -6,6 +6,8 @@ import { CommunityInvite, PersonalFeedbackButton } from "@/components/challenge/
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
+import toolboxImage from "@/assets/toolbox.jpg"
+import { HeroImage } from "@/components/challenge/HeroImage"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
@@ -15,25 +17,12 @@ import { ToolCard } from "./ToolCard"
 import { ToolDialog } from "./ToolDialog"
 import { TOOLS, TOOLS_BY_ID, type Tool } from "./tools"
 
-const Hero = styled.header`
-  padding: 28px 20px;
-  border-radius: calc(var(--radius) * 2);
-  background: linear-gradient(160deg, oklch(0.94 0.05 70), oklch(0.9 0.06 40));
-  text-align: center;
-
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1.2;
-  }
-
-  p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    font-weight: 500;
-    line-height: 1.6;
-  }
+const HeroText = styled.p`
+  margin: 14px 0 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--secondary-foreground);
 `
 
 const Section = styled.section`
@@ -99,7 +88,7 @@ const BoardTile = styled.button<{ $saved: boolean }>`
   border-radius: 18px;
   border: 1.5px solid ${({ $saved }) => ($saved ? "var(--primary)" : "transparent")};
   background: var(--card);
-  box-shadow: 0 4px 14px -10px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 4px 14px -10px oklch(0.3 0.06 300 / 0.35);
   color: var(--foreground);
   font: inherit;
   font-size: 0.8rem;
@@ -167,10 +156,12 @@ export default function ToolboxPage() {
   return (
     <PageShell>
       <PageInner>
-        <Hero>
-          <h1>אין זמן? יש פתרון.</h1>
-          <p>לא צריך יום מושלם. צריך כמה פתרונות זמינים שאפשר לשלוף ברגע האמת.</p>
-        </Hero>
+        <div>
+          <HeroImage image={toolboxImage} badge="🧰" title="אין זמן? יש פתרון." />
+          <HeroText>
+            לא צריך יום מושלם. צריך כמה פתרונות זמינים שאפשר לשלוף ברגע האמת.
+          </HeroText>
+        </div>
 
         <Section>
           <SectionTitle>איזה יום עמוס יש לך?</SectionTitle>

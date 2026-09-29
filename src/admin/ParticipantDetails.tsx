@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { Day3Data, Participant } from "@/data/participant"
+import type { Participant } from "@/data/participant"
 import { HARDEST_OPTIONS, MEALS } from "@/days/day1/types"
 import { MEAL_OPTIONS } from "@/days/day2/content"
 import { getDay2Feedback } from "@/days/day2/feedback"
-import { EXPERIMENTS, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
+import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
 import { TOOLS_BY_ID } from "@/toolbox/tools"
 import { formatDateTime } from "./adminData"
 
@@ -80,11 +80,6 @@ function Section({
 const orDash = (value: string) => value.trim() || "—"
 const yesNo = (value: boolean) => (value ? "✓" : "—")
 
-function experimentText(day3: Day3Data): string {
-  const key = day3.experimentChoice || day3.helpChoice
-  return key ? EXPERIMENTS[key] : "—"
-}
-
 export function ParticipantDetails({
   participant,
   onClose,
@@ -99,7 +94,7 @@ export function ParticipantDetails({
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">{participant.firstName}</DialogTitle>
             <DialogDescription>
-              נרשם/ה {formatDateTime(participant.createdAt)} · עדכון אחרון{" "}
+              תאריך הרשמה: {formatDateTime(participant.createdAt)} · עדכון אחרון{" "}
               {formatDateTime(participant.updatedAt)}
             </DialogDescription>
           </DialogHeader>
@@ -141,7 +136,7 @@ export function ParticipantDetails({
               <Row label="פחמימה" value={yesNo(participant.day2.carbs)} />
               <Row label="שומן" value={yesNo(participant.day2.fat)} />
               {participant.day2.completedAt && (
-                <Row label="פידבק שקיבל/ה" value={getDay2Feedback(participant.day2).title} />
+                <Row label="הפידבק שהתקבל" value={getDay2Feedback(participant.day2).title} />
               )}
             </dl>
           </Section>
@@ -168,7 +163,6 @@ export function ParticipantDetails({
                   HELP_OPTIONS.find((o) => o.value === participant.day3.helpChoice)?.label ?? "—"
                 }
               />
-              <Row label="הניסוי שנבחר" value={experimentText(participant.day3)} />
               <Row label="הוסיפו" value={orDash(participant.day3.extraNote)} />
             </dl>
           </Section>
@@ -176,7 +170,7 @@ export function ParticipantDetails({
           <Section title="ארגז הכלים" completedAt={participant.toolbox.completedAt}>
             <dl>
               <Row
-                label="כלים שבחר/ה"
+                label="הכלים שנבחרו"
                 value={
                   participant.toolbox.selectedTools
                     .map((id) => TOOLS_BY_ID[id] && `${TOOLS_BY_ID[id].emoji} ${TOOLS_BY_ID[id].name}`)

@@ -39,7 +39,6 @@ export type Day3Data = {
   momentChoice: Day3MomentChoice
   happensChoice: Day3HappensChoice
   helpChoice: Day3HelpChoice
-  experimentChoice: Day3HelpChoice
   extraNote: string
   completedAt: string
 }
@@ -81,7 +80,6 @@ const emptyDay3 = (): Day3Data => ({
   momentChoice: "",
   happensChoice: "",
   helpChoice: "",
-  experimentChoice: "",
   extraNote: "",
   completedAt: "",
 })

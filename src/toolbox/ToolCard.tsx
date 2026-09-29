@@ -9,7 +9,7 @@ const Card = styled.article`
   padding: 16px;
   border-radius: calc(var(--radius) * 1.4);
   background: var(--card);
-  box-shadow: 0 1px 2px oklch(0.4 0.05 50 / 0.06), 0 6px 18px -10px oklch(0.4 0.05 50 / 0.18);
+  box-shadow: 0 1px 2px oklch(0.3 0.06 300 / 0.06), 0 6px 18px -10px oklch(0.3 0.06 300 / 0.18);
 `
 
 const Open = styled.button`

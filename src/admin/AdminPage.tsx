@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react"
 import type { Session } from "@supabase/supabase-js"
-import { Link as LinkIcon, LogOut, MessageCircle, RefreshCw } from "lucide-react"
+import { Link as LinkIcon, LogOut, RefreshCw } from "lucide-react"
 import styled from "styled-components"
 import { PageTitle, Subtle } from "@/components/layout/PageShell"
 import { Button } from "@/components/ui/button"
@@ -15,22 +15,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { whatsAppLinkForPhone } from "@/config"
 import { checkIsSuperAdmin, fetchOwnCoach, type Coach } from "@/data/coach"
 import type { Participant } from "@/data/participant"
 import { supabase } from "@/data/supabase"
 import {
-  createParticipant,
   fetchParticipants,
   fetchRegistrations,
+  fetchSummaries,
   formatRelativeDay,
-  linkRegistrationToParticipant,
   type Registration,
+  type SummaryRow,
 } from "./adminData"
 import { CoachesList } from "./CoachesList"
 import { CoachSettings } from "./CoachSettings"
 import { ParticipantDetails } from "./ParticipantDetails"
 import { ParticipantLinkPicker } from "./ParticipantLinkPicker"
+import { RegistrationsTab } from "./RegistrationsTab"
+import { SummaryDialog } from "./SummaryDialog"
 
 const Shell = styled.main`
   min-height: 100dvh;
@@ -85,7 +86,7 @@ const Panel = styled.div`
   padding: 8px;
   border-radius: 18px;
   background: var(--card);
-  box-shadow: 0 6px 20px -14px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 6px 20px -14px oklch(0.3 0.06 300 / 0.35);
 `
 
 const LoginForm = styled.form`
@@ -97,38 +98,10 @@ const LoginForm = styled.form`
   padding: 28px 22px;
   border-radius: 20px;
   background: var(--card);
-  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 12px 32px -18px oklch(0.3 0.06 300 / 0.35);
 
   input {
     height: 44px;
-  }
-`
-
-const AddParticipantCard = styled.form`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 10px;
-  padding: 16px;
-  border-radius: 16px;
-  background: var(--secondary);
-
-  label {
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-`
-
-const AddField = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 200px;
-
-  input {
-    height: 40px;
-    background: var(--card);
   }
 `
 
@@ -144,29 +117,6 @@ const NameButton = styled.button`
   text-underline-offset: 3px;
 `
 
-const PhoneLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  direction: ltr;
-`
-
-const AddedRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-start;
-`
-
-const AddedMark = styled.span`
-  font-weight: 600;
-  color: var(--primary);
-  font-size: 0.85rem;
-`
-
 const ErrorText = styled.p`
   margin: 0;
   color: var(--destructive);
@@ -174,7 +124,6 @@ const ErrorText = styled.p`
 `
 
 const done = (iso: string) => (iso ? "✓" : "—")
-const consentMark = (v: boolean) => (v ? "✓" : "—")
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null)
@@ -257,21 +206,21 @@ function Login() {
   )
 }
 
-type Tab = "participants" | "registrations" | "settings" | "coaches"
+type Tab = "registrations" | "participants" | "settings" | "coaches"
 
 function Dashboard() {
-  const [tab, setTab] = useState<Tab>("participants")
+  const [tab, setTab] = useState<Tab>("registrations")
   const [coach, setCoach] = useState<Coach | null>(null)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [registrations, setRegistrations] = useState<Registration[]>([])
+  const [summaries, setSummaries] = useState<SummaryRow[]>([])
   const [status, setStatus] = useState<"loading" | "ready" | "no-profile" | "error">("loading")
   const [selected, setSelected] = useState<Participant | null>(null)
   const [linksFor, setLinksFor] = useState<Participant | null>(null)
-  const [prefill, setPrefill] = useState<{
-    name: string
-    key: number
-    registrationId?: string
+  const [summaryFor, setSummaryFor] = useState<{
+    participant: Participant
+    registration: Registration
   } | null>(null)
 
   const load = useCallback(async () => {
@@ -290,7 +239,13 @@ function Dashboard() {
     }
 
     // Independent try/catch per table: one failing doesn't block the other.
-    const [p, r] = await Promise.allSettled([fetchParticipants(), fetchRegistrations()])
+    const [p, r, sm] = await Promise.allSettled([
+      fetchParticipants(),
+      fetchRegistrations(),
+      fetchSummaries(),
+    ])
+    if (sm.status === "fulfilled") setSummaries(sm.value)
+    else console.error(sm.reason)
     if (p.status === "fulfilled") setParticipants(p.value)
     else console.error(p.reason)
     if (r.status === "fulfilled") setRegistrations(r.value)
@@ -343,17 +298,17 @@ function Dashboard() {
           <Tabs>
             <TabButton
               type="button"
-              $active={tab === "participants"}
-              onClick={() => setTab("participants")}
-            >
-              משתתפים
-            </TabButton>
-            <TabButton
-              type="button"
               $active={tab === "registrations"}
               onClick={() => setTab("registrations")}
             >
-              הרשמות
+              נרשמים
+            </TabButton>
+            <TabButton
+              type="button"
+              $active={tab === "participants"}
+              onClick={() => setTab("participants")}
+            >
+              התקדמות
             </TabButton>
             <TabButton
               type="button"
@@ -375,12 +330,6 @@ function Dashboard() {
 
           {tab === "participants" && (
             <>
-              <AddParticipant
-                key={prefill?.key ?? "default"}
-                initialName={prefill?.name ?? ""}
-                registrationId={prefill?.registrationId}
-                onCreated={() => void load()}
-              />
               <Panel>
                 <Table>
                   <TableHeader>
@@ -431,79 +380,15 @@ function Dashboard() {
           )}
 
           {tab === "registrations" && (
-            <Panel>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-start">שם</TableHead>
-                    <TableHead className="text-start">טלפון</TableHead>
-                    <TableHead className="text-start">מייל</TableHead>
-                    <TableHead className="text-center">מדיניות</TableHead>
-                    <TableHead className="text-center">HoldOn</TableHead>
-                    <TableHead className="text-start">נרשם/ה</TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {registrations.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        עוד אין הרשמות
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {registrations.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.fullName}</TableCell>
-                      <TableCell>
-                        <PhoneLink
-                          href={whatsAppLinkForPhone(
-                            r.phone,
-                            `היי ${r.fullName}, ראיתי שנרשמת לאתגר "3 ימים חוזרים לשגרה" 🙂`,
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <MessageCircle size={14} />
-                          {r.phone}
-                        </PhoneLink>
-                      </TableCell>
-                      <TableCell dir="ltr" className="text-start">
-                        {r.email}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {consentMark(r.consentPrivacy)}
-                      </TableCell>
-                      <TableCell className="text-center">{consentMark(r.consentHoldon)}</TableCell>
-                      <TableCell>{formatRelativeDay(r.createdAt)}</TableCell>
-                      <TableCell>
-                        {r.participantId ? (
-                          <AddedRow>
-                            <AddedMark>✓ נוסף/ה</AddedMark>
-                            <ParticipantLinkPicker participantId={r.participantId} />
-                          </AddedRow>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setPrefill({
-                                name: r.fullName,
-                                key: Date.now(),
-                                registrationId: r.id,
-                              })
-                              setTab("participants")
-                            }}
-                          >
-                            → הוספת משתתף/ת
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Panel>
+            <RegistrationsTab
+              coach={coach}
+              registrations={registrations}
+              participants={participants}
+              summaries={summaries}
+              reload={() => void load()}
+              onOpenAnswers={setSelected}
+              onOpenSummary={(participant, registration) => setSummaryFor({ participant, registration })}
+            />
           )}
 
           {tab === "settings" && (
@@ -512,6 +397,16 @@ function Dashboard() {
 
           {tab === "coaches" && isSuperAdmin && <CoachesList currentCoachId={coach.id} />}
         </>
+      )}
+
+      {coach && (
+        <SummaryDialog
+          target={summaryFor}
+          coach={coach}
+          summary={summaries.find((x) => x.participantId === summaryFor?.participant.participantId)}
+          onClose={() => setSummaryFor(null)}
+          onSaved={() => void load()}
+        />
       )}
 
       <ParticipantDetails participant={selected} onClose={() => setSelected(null)} />
@@ -527,58 +422,5 @@ function Dashboard() {
         )}
       </Dialog>
     </Inner>
-  )
-}
-
-function AddParticipant({
-  initialName = "",
-  registrationId,
-  onCreated,
-}: {
-  initialName?: string
-  registrationId?: string
-  onCreated: () => void
-}) {
-  const [name, setName] = useState(initialName)
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState("")
-  const [createdId, setCreatedId] = useState("")
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!name.trim()) return
-    setCreating(true)
-    setError("")
-    try {
-      const id = await createParticipant(name)
-      if (registrationId) await linkRegistrationToParticipant(registrationId, id)
-      setCreatedId(id)
-      setName("")
-      onCreated()
-    } catch (err) {
-      console.error(err)
-      setError("יצירת המשתתף/ת נכשלה. נסו שוב.")
-    } finally {
-      setCreating(false)
-    }
-  }
-
-  return (
-    <AddParticipantCard onSubmit={(e) => void submit(e)}>
-      <AddField>
-        <Label htmlFor="new-participant-name">משתתף/ת חדש/ה</Label>
-        <Input
-          id="new-participant-name"
-          placeholder="שם"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </AddField>
-      <Button type="submit" disabled={!name.trim() || creating}>
-        צור קישור אישי
-      </Button>
-      {error && <ErrorText>{error}</ErrorText>}
-      {createdId && <ParticipantLinkPicker participantId={createdId} />}
-    </AddParticipantCard>
   )
 }

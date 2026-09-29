@@ -13,7 +13,7 @@ const Card = styled.div`
   padding: 28px 20px;
   border-radius: calc(var(--radius) * 1.8);
   background: var(--card);
-  box-shadow: 0 12px 32px -18px oklch(0.4 0.05 50 / 0.35);
+  box-shadow: 0 12px 32px -18px oklch(0.3 0.06 300 / 0.35);
 `
 
 // Every participant now arrives via a coach-issued personal link
@@ -26,8 +26,8 @@ function NoPersonalLink() {
         <Card>
           <PageTitle as="h1">צריך קישור אישי</PageTitle>
           <Subtle>
-            כדי להשתתף באתגר צריך קישור אישי מהמאמן/ת שלך. אם עדיין אין לך קישור, אפשר לפנות
-            אליו/ה.
+            כדי להשתתף באתגר צריך קישור אישי ממי שמפעיל את האתגר. אם עדיין אין לכם קישור, אפשר
+            לפנות אליהם.
           </Subtle>
         </Card>
       </Center>

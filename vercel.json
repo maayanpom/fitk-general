@@ -5,6 +5,10 @@
     { "source": "/preview/day-2", "destination": "/preview/day-2.html" },
     { "source": "/preview/day-3", "destination": "/preview/day-3.html" },
     { "source": "/preview/toolbox", "destination": "/preview/toolbox.html" },
+    { "source": "/preview/day-1-filled", "destination": "/preview/day-1-filled.html" },
+    { "source": "/preview/day-2-filled", "destination": "/preview/day-2-filled.html" },
+    { "source": "/preview/day-3-filled", "destination": "/preview/day-3-filled.html" },
+    { "source": "/preview/toolbox-filled", "destination": "/preview/toolbox-filled.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

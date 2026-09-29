@@ -2,24 +2,21 @@ import { Fragment } from "react"
 import { MessageCircle } from "lucide-react"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
+import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
 import { DoneButton } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
-import {
-  Eyebrow,
-  PageInner,
-  PageShell,
-  SectionTitle,
-  Subtle,
-} from "@/components/layout/PageShell"
+import { WhyItMatters } from "@/components/challenge/WhyItMatters"
+import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { Timeline, TimelineConnector } from "@/components/layout/Timeline"
 import { Button } from "@/components/ui/button"
 import { whatsAppLinkForPhone } from "@/config"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
+import day1Image from "@/assets/day1.jpg"
 import { EatingPointFields } from "./EatingPointFields"
 import { getDay1Feedback } from "./feedback"
 import { HardestMomentPicker } from "./HardestMomentPicker"
@@ -55,8 +52,8 @@ const Notes = styled.ul`
   flex-direction: column;
   gap: 4px;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.7;
 `
 
 const Tip = styled.p`
@@ -65,8 +62,8 @@ const Tip = styled.p`
   border-radius: calc(var(--radius) * 1.2);
   background: var(--secondary);
   color: var(--secondary-foreground);
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.7;
 `
 
 const Extras = styled.div`
@@ -75,12 +72,6 @@ const Extras = styled.div`
   align-items: center;
   gap: 10px;
   text-align: center;
-`
-
-const ProgressLine = styled.p`
-  margin: 0;
-  font-weight: 600;
-  color: var(--primary);
 `
 
 const Teaser = styled.p`
@@ -101,25 +92,25 @@ export default function Day1Page() {
   const { isCompleted, complete, resultRef } = useCompletion("day1")
   const coach = useCoachPublicInfo(participant.coachSlug)
   const data = participant.day1
-  const feedback = getDay1Feedback(data)
+  const feedback = getDay1Feedback(data, coach?.longGapHours)
 
   return (
     <PageShell>
       <PageInner>
         <DayHeader
-          eyebrow="יום 1"
+          day={1}
+          image={day1Image}
           title="הסדר שלי"
           lead="היום מציירים תמונה אמיתית של היום שלכם. בלי שיפוטים ובלי תפריט מושלם."
         />
 
-        <Section>
-          <SectionTitle>למה סדר?</SectionTitle>
-          <Subtle>
+        <WhyItMatters>
+          <Subtle style={{ margin: 0 }}>
             ימים עם סדר מרגישים אחרת. סדר הוא לא תפריט קפדני, אלא כמה נקודות אכילה שאפשר לסמוך
             עליהן. היום נמפה איפה הן נמצאות אצלכם, ואיפה קשה להחזיק אותן. אין תשובה נכונה, יש רק
             תמונה אמיתית.
           </Subtle>
-        </Section>
+        </WhyItMatters>
 
         <Section>
           <SectionTitle>נקודות האכילה שלי</SectionTitle>
@@ -129,7 +120,6 @@ export default function Day1Page() {
           </Subtle>
           <Notes>
             <li>הנקודות: בוקר, ביניים, צהריים, אחר הצהריים, ערב, ונשנושים בין לבין.</li>
-            <li>לכל נקודה: שעה ומה בערך.</li>
             <li>אפשר לכתוב בקצרה (עד 60 תווים).</li>
           </Notes>
           <Timeline>
@@ -158,10 +148,7 @@ export default function Day1Page() {
         </Section>
 
         <TaskBox>
-          <div>
-            <Eyebrow>המשימה היחידה</Eyebrow>
-            <SectionTitle>הנקודה הקשה</SectionTitle>
-          </div>
+          <SectionTitle>הנקודה הקשה</SectionTitle>
           <Question>איפה הכי קשה לכם לשמור על הסדר היום?</Question>
           <HardestMomentPicker
             value={data.hardestMoment}
@@ -173,7 +160,10 @@ export default function Day1Page() {
           <SectionTitle>שלושה דברים שעושים סדר ביום</SectionTitle>
           <Notes>
             <li>נקודת אכילה אחת קבועה שלא זזה, אפילו קטנה.</li>
-            <li>משהו זמין מראש. כשאין מה לאכול בהישג יד, ההחלטה נעשית בלחץ.</li>
+            <li>
+              <strong>תכנון והתארגנות:</strong> לתכנן בערך מה נאכל היום, ולוודא שיש בבית את מה
+              שצריך או שאפשר לקנות אותו בקלות.
+            </li>
             <li>כוס מים ליד, כדי שהשתייה לא תלויה בזיכרון.</li>
           </Notes>
         </Section>
@@ -185,7 +175,9 @@ export default function Day1Page() {
         <Tip>🔄 משהו לא הלך כמתוכנן? לא מפצים ולא מדלגים. חוזרים לנקודה הבאה כרגיל.</Tip>
 
         <Section>
-          <DoneButton onClick={() => void complete()}>סיימתי ✓</DoneButton>
+          <DoneButton disabled={!data.hardestMoment} onClick={() => void complete()}>
+            סיימתי ✓
+          </DoneButton>
         </Section>
 
         <ResultArea ref={resultRef}>
@@ -194,7 +186,7 @@ export default function Day1Page() {
               <FeedbackCard title={feedback.title} body={feedback.body} />
               <CompletionMessage />
               <Extras>
-                <ProgressLine>הפרופיל שלכם: 33%</ProgressLine>
+                <CompletionProgress percent={33} />
                 <Teaser>
                   מחר: הצלחת שלי. נבנה יחד צלחת מהיום האמיתי שלכם. הקישור יגיע אליכם בוואטסאפ
                   בבוקר.

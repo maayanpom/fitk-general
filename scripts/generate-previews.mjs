@@ -52,41 +52,93 @@ try {
     updatedAt: new Date().toISOString(),
   })
 
-  const mockContextValue = {
-    participant: dummyParticipant,
+  // "?filled" view: the same pages after a participant finished, with sample
+  // answers, so the feedback / completion state can be reviewed without JS.
+  const done = new Date().toISOString()
+  const filledParticipant = normalizeParticipant({
+    ...dummyParticipant,
+    day1: {
+      breakfast: { time: "07:30", food: "קפה וטוסט" },
+      lunch: { time: "13:30", food: "סלט עם טונה" },
+      dinner: { time: "20:00", food: "חביתה וירקות" },
+      additionalSnacks: [{ time: "16:00", food: "פרי" }],
+      hardestMoment: "afternoon",
+      completedAt: done,
+    },
+    day2: {
+      mealChosen: "lunch",
+      protein: false,
+      vegetables: true,
+      carbs: true,
+      fat: false,
+      completedAt: done,
+    },
+    day3: {
+      momentChoice: "afternoon",
+      happensChoice: "grabWhatever",
+      helpChoice: "protein",
+      extraNote: "",
+      completedAt: done,
+    },
+    toolbox: { selectedTools: ["cookTwice", "freezer"], completedAt: done },
+  })
+
+  const contextFor = (participant) => ({
+    participant,
     syncState: "local",
     adoptById: async () => false,
     updateSection: () => {},
     completeSection: async () => false,
     retrySync: async () => false,
-  }
+  })
 
-  const cssFile = fs.readdirSync(path.join(distDir, "assets")).find((f) => f.endsWith(".css"))
+  const assetsDir = path.join(distDir, "assets")
+  const builtAssets = fs.readdirSync(assetsDir)
+  const cssFile = builtAssets.find((f) => f.endsWith(".css"))
+
+  // Images imported by the components render as dev URLs (/src/assets/day1.jpg)
+  // under SSR; point them at the hashed files Vite emitted into dist/assets.
+  const fixAssetUrls = (html) =>
+    html.replace(/\/src\/assets\/([\w-]+)\.(jpg|jpeg|png|webp|svg)/g, (match, name, ext) => {
+      const built = builtAssets.find(
+        (f) => f.startsWith(`${name}-`) && f.endsWith(`.${ext}`),
+      )
+      return built ? `/assets/${built}` : match
+    })
 
   fs.mkdirSync(outDir, { recursive: true })
 
   for (const page of PAGES) {
-    const sheet = new ServerStyleSheet()
-    const element = React.createElement(
-      MemoryRouter,
-      { initialEntries: [`/${page.slug}`] },
-      React.createElement(
-        ParticipantContext.Provider,
-        { value: mockContextValue },
-        React.createElement(page.Component),
-      ),
-    )
+    for (const variant of ["", "-filled"]) {
+      const filled = variant === "-filled"
+      const sheet = new ServerStyleSheet()
+      const element = React.createElement(
+        MemoryRouter,
+        { initialEntries: [`/${page.slug}`] },
+        React.createElement(
+          ParticipantContext.Provider,
+          { value: contextFor(filled ? filledParticipant : dummyParticipant) },
+          React.createElement(page.Component),
+        ),
+      )
 
-    let body
-    let styleTags
-    try {
-      body = renderToStaticMarkup(sheet.collectStyles(element))
-      styleTags = sheet.getStyleTags()
-    } finally {
-      sheet.seal()
-    }
+      let body
+      let styleTags
+      try {
+        body = renderToStaticMarkup(sheet.collectStyles(element))
+        styleTags = sheet.getStyleTags()
+      } finally {
+        sheet.seal()
+      }
 
-    const html = `<!doctype html>
+      const outName = page.slug.replace(/^challenge-/, "")
+      // Static hosting can't branch on a query string, so the plain page sends
+      // "?filled" visitors to the filled snapshot.
+      const redirect = filled
+        ? ""
+        : `<script>if (/[?&]filled\b/.test(location.search)) location.replace("/preview/${outName}-filled")</script>`
+
+      const html = `<!doctype html>
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -99,18 +151,19 @@ try {
       rel="stylesheet"
     />
     ${cssFile ? `<link rel="stylesheet" href="/assets/${cssFile}" />` : ""}
-    <title>${page.title} – תצוגה מקדימה</title>
+    <title>${page.title} – תצוגה מקדימה${filled ? " (אחרי מילוי)" : ""}</title>
     ${styleTags}
+    ${redirect}
   </head>
   <body>
-    <div id="root">${body}</div>
+    <div id="root">${fixAssetUrls(body)}</div>
   </body>
 </html>
 `
 
-    const outName = page.slug.replace(/^challenge-/, "")
-    fs.writeFileSync(path.join(outDir, `${outName}.html`), html)
-    console.log(`wrote dist/preview/${outName}.html`)
+      fs.writeFileSync(path.join(outDir, `${outName}${variant}.html`), html)
+      console.log(`wrote dist/preview/${outName}${variant}.html`)
+    }
   }
 } finally {
   await vite.close()

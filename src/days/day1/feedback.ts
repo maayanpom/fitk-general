@@ -5,8 +5,9 @@ export type Day1Feedback = {
   body: string
 }
 
-// Gaps at or above this many hours between meal points count as "long".
-const LONG_GAP_HOURS = 5
+// Gaps at or above this many hours between meal points count as "long"
+// (default; each coach can change it in settings).
+const DEFAULT_LONG_GAP_HOURS = 5
 
 type TimedPoint = { minutes: number; time: string }
 
@@ -31,7 +32,35 @@ function hardestAppendix(hardestMoment: Day1Data["hardestMoment"]): string {
   return label ? ` הנקודה שסימנתם כקשה היא ${label}. ביום 3 נחפש לה פתרון קטן.` : ""
 }
 
-export function getDay1Feedback(data: Day1Data): Day1Feedback {
+// The longest gap between two consecutive timed points, or null when fewer
+// than two points have a time. Used by the summary draft generator.
+export function getLongestGap(
+  data: Day1Data,
+): { hours: number; from: string; to: string; timedCount: number } | null {
+  const points: EatingPoint[] = [...MEALS.map((m) => data[m.key]), ...data.additionalSnacks]
+  const timed = points
+    .map(toTimedPoint)
+    .filter((p): p is TimedPoint => p !== null)
+    .sort((a, b) => a.minutes - b.minutes)
+  if (timed.length < 2) return null
+
+  let best = { gap: -1, from: timed[0], to: timed[1] }
+  for (let i = 1; i < timed.length; i++) {
+    const gap = timed[i].minutes - timed[i - 1].minutes
+    if (gap > best.gap) best = { gap, from: timed[i - 1], to: timed[i] }
+  }
+  return {
+    hours: best.gap / 60,
+    from: best.from.time,
+    to: best.to.time,
+    timedCount: timed.length,
+  }
+}
+
+export function getDay1Feedback(
+  data: Day1Data,
+  longGapHours: number = DEFAULT_LONG_GAP_HOURS,
+): Day1Feedback {
   const points: EatingPoint[] = [...MEALS.map((m) => data[m.key]), ...data.additionalSnacks]
   const allEmpty = points.every((p) => !p.time && !p.food.trim())
 
@@ -67,7 +96,7 @@ export function getDay1Feedback(data: Day1Data): Day1Feedback {
     }
   }
 
-  if (maxGap / 60 >= LONG_GAP_HOURS) {
+  if (maxGap / 60 >= longGapHours) {
     return {
       title: TITLE,
       body:

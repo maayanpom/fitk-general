@@ -4,7 +4,7 @@ export const PageShell = styled.main`
   min-height: 100dvh;
   padding: 32px 16px 56px;
   background:
-    radial-gradient(120% 60% at 100% 0%, oklch(0.94 0.05 60 / 0.7), transparent 60%),
+    radial-gradient(120% 60% at 100% 0%, rgb(216 201 240 / 0.6), transparent 60%),
     var(--background);
 `
 
@@ -19,7 +19,7 @@ export const PageInner = styled.div`
 
 export const Eyebrow = styled.span`
   display: inline-block;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--primary);
@@ -41,5 +41,6 @@ export const SectionTitle = styled.h2`
 export const Subtle = styled.p`
   margin: 6px 0 0;
   color: var(--muted-foreground);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.7;
 `

@@ -1,11 +1,12 @@
 import styled from "styled-components"
+import { TimeField } from "@/components/challenge/TimeField"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { EatingPoint } from "./types"
 
 const Row = styled.div`
   display: grid;
-  grid-template-columns: 104px 1fr;
+  grid-template-columns: 132px 1fr;
   gap: 10px;
   align-items: end;
   flex: 1;
@@ -17,19 +18,16 @@ const Field = styled.div`
   gap: 6px;
 
   label {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--muted-foreground);
     font-weight: 500;
   }
 
   input {
-    height: 42px;
+    height: 48px;
     background: var(--background);
   }
 
-  input[type="time"] {
-    text-align: center;
-  }
 `
 
 type Props = {
@@ -44,12 +42,10 @@ export function EatingPointFields({ id, value, foodLabel, onChange }: Props) {
     <Row>
       <Field>
         <Label htmlFor={`${id}-time`}>שעה</Label>
-        <Input
+        <TimeField
           id={`${id}-time`}
-          type="time"
-          dir="ltr"
           value={value.time}
-          onChange={(e) => onChange({ ...value, time: e.target.value })}
+          onChange={(time) => onChange({ ...value, time })}
         />
       </Field>
       <Field>
