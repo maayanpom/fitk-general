@@ -8,7 +8,7 @@ import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
 import toolboxImage from "@/assets/toolbox.webp"
 import { HeroImage } from "@/components/challenge/HeroImage"
-import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
+import { PageInner as BasePageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import { useSavedTools } from "./useSavedTools"
@@ -16,6 +16,13 @@ import { SITUATIONS } from "./situations"
 import { ToolCard } from "./ToolCard"
 import { ToolDialog } from "./ToolDialog"
 import { TOOLS, TOOLS_BY_ID, type Tool } from "./tools"
+
+// Wider than the day pages, so the tool board fits in fewer rows on tablets and desktops.
+const PageInner = styled(BasePageInner)`
+  @media (min-width: 640px) {
+    max-width: 720px;
+  }
+`
 
 const HeroText = styled.p`
   margin: 14px 0 0;
@@ -74,8 +81,12 @@ const CardList = styled.div`
 
 const Board = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 `
 
 const BoardTile = styled.button<{ $saved: boolean }>`
@@ -84,8 +95,8 @@ const BoardTile = styled.button<{ $saved: boolean }>`
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 16px 10px 14px;
-  min-height: 112px;
+  padding: 12px 6px 10px;
+  min-height: 96px;
   justify-content: center;
   border-radius: 18px;
   border: 1.5px solid ${({ $saved }) => ($saved ? "var(--primary)" : "transparent")};
@@ -93,14 +104,14 @@ const BoardTile = styled.button<{ $saved: boolean }>`
   box-shadow: 0 4px 14px -10px oklch(0.3 0.06 300 / 0.35);
   color: var(--foreground);
   font: inherit;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   text-align: center;
   cursor: pointer;
 
   .emoji {
-    font-size: 2.1rem;
+    font-size: 1.8rem;
   }
 
   .star {

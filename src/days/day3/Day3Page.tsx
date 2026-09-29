@@ -4,7 +4,7 @@ import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
 import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
-import { CommunityInvite } from "@/components/challenge/links"
+import { CommunityInvite, QuestionButton } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
@@ -246,6 +246,8 @@ export default function Day3Page() {
               </Celebration>
 
               <CommunityInvite communityUrl={coach?.communityUrl} />
+
+              <QuestionButton phone={coach?.phone} />
             </>
           )}
         </ResultArea>

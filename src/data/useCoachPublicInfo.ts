@@ -4,8 +4,13 @@ import { getCoachPublicBySlug, type CoachPublicInfo } from "./coach"
 // Fetches the public WhatsApp/community/name settings for the coach a
 // participant belongs to, so their pages never bake one coach's info into
 // the shared build - each participant sees their own coach's details.
+// Only the static preview generator (scripts/generate-previews.mjs) sets this, so
+// server-rendered snapshots show the buttons that depend on coach settings.
+const previewCoach = () =>
+  (globalThis as { __PREVIEW_COACH__?: CoachPublicInfo }).__PREVIEW_COACH__
+
 export function useCoachPublicInfo(slug: string | undefined) {
-  const [info, setInfo] = useState<CoachPublicInfo | null>(null)
+  const [info, setInfo] = useState<CoachPublicInfo | null>(() => previewCoach() ?? null)
 
   useEffect(() => {
     if (!slug) return

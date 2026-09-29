@@ -43,6 +43,19 @@ try {
   const { normalizeParticipant } = await vite.ssrLoadModule("/src/data/participant.ts")
   const { PAGES } = await vite.ssrLoadModule("/src/routes.ts")
 
+  // Stand-in coach settings, so snapshots show the WhatsApp / community buttons.
+  globalThis.__PREVIEW_COACH__ = {
+    name: "שם המאמנת",
+    email: "coach@example.com",
+    phone: "972500000000",
+    communityUrl: "https://chat.whatsapp.com/example",
+    slug: "preview",
+    privacyUrl: null,
+    requireHoldonConsent: true,
+    longGapHours: 5,
+    summaryDeliveryText: null,
+  }
+
   const dummyParticipant = normalizeParticipant({
     participantId: "preview",
     coachSlug: "preview",

@@ -1,9 +1,9 @@
 import { Fragment } from "react"
-import { MessageCircle } from "lucide-react"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
+import { QuestionButton } from "@/components/challenge/links"
 import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
@@ -13,8 +13,6 @@ import { useCompletion } from "@/components/challenge/useCompletion"
 import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { Timeline, TimelineConnector } from "@/components/layout/Timeline"
-import { Button } from "@/components/ui/button"
-import { whatsAppLinkForPhone } from "@/config"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import day1Image from "@/assets/day1.webp"
@@ -63,13 +61,6 @@ const Extras = styled.div`
   align-items: center;
   gap: 10px;
   text-align: center;
-`
-
-const WhatsAppButton = styled(Button)`
-  height: 48px;
-  border-radius: 999px;
-  font-size: 1rem;
-  font-weight: 600;
 `
 
 export default function Day1Page() {
@@ -166,18 +157,7 @@ export default function Day1Page() {
                   מחר: הצלחת שלי. נבנה יחד צלחת מהיום האמיתי שלכם. הקישור יגיע אליכם בוואטסאפ בבוקר.
                 </TomorrowCard>
                 <Subtle style={{ margin: 0 }}>אפשר לחזור ולערוך את התשובות עד סוף היום.</Subtle>
-                {coach?.phone && (
-                  <WhatsAppButton variant="outline" asChild>
-                    <a
-                      href={whatsAppLinkForPhone(coach.phone, "היי, יש לי שאלה לגבי האתגר 🙂")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageCircle />
-                      שאלה? כתבו לי בוואטסאפ
-                    </a>
-                  </WhatsAppButton>
-                )}
+                <QuestionButton phone={coach?.phone} />
               </Extras>
             </>
           )}

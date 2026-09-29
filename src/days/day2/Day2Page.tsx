@@ -4,6 +4,7 @@ import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
+import { QuestionButton } from "@/components/challenge/links"
 import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
@@ -14,6 +15,7 @@ import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import type { Day2MealChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
+import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import day2Image from "@/assets/day2.webp"
 import { MEAL_OPTIONS } from "./content"
 import { getDay2Feedback } from "./feedback"
@@ -116,6 +118,7 @@ const Extras = styled.div`
 export default function Day2Page() {
   const { participant, updateSection } = useParticipant()
   const { isCompleted, complete, resultRef } = useCompletion("day2")
+  const coach = useCoachPublicInfo(participant.coachSlug)
   const data = participant.day2
   const feedback = getDay2Feedback(data)
 
@@ -204,6 +207,7 @@ export default function Day2Page() {
               <Extras>
                 <CompletionProgress percent={66} />
                 <TomorrowCard>מחר: הפתרון שלי. נבחר רגע אחד ונמצא לו פתרון קטן.</TomorrowCard>
+                <QuestionButton phone={coach?.phone} />
               </Extras>
             </>
           )}

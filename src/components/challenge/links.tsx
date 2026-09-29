@@ -1,7 +1,7 @@
 import { MessageCircle, Users } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
-import { personalFeedbackUrl } from "@/config"
+import { personalFeedbackUrl, whatsAppLinkForPhone } from "@/config"
 
 const LinkButton = styled(Button)`
   width: 100%;
@@ -10,6 +10,24 @@ const LinkButton = styled(Button)`
   font-size: 1rem;
   font-weight: 600;
 `
+
+// "Have a question? Write me on WhatsApp", shown at the end of every day.
+export function QuestionButton({ phone }: { phone: string | undefined }) {
+  if (!phone) return null
+
+  return (
+    <LinkButton variant="outline" asChild>
+      <a
+        href={whatsAppLinkForPhone(phone, "היי, יש לי שאלה לגבי האתגר 🙂")}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <MessageCircle />
+        שאלה? כתבו לי בוואטסאפ
+      </a>
+    </LinkButton>
+  )
+}
 
 type PersonalFeedbackButtonProps = {
   firstName?: string
