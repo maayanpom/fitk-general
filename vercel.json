@@ -1,14 +1,24 @@
 {
+  "headers": [
+    {
+      "source": "/preview",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/preview/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
-    { "source": "/preview/day-1", "destination": "/preview/day-1.html" },
-    { "source": "/preview/day-2", "destination": "/preview/day-2.html" },
-    { "source": "/preview/day-3", "destination": "/preview/day-3.html" },
-    { "source": "/preview/toolbox", "destination": "/preview/toolbox.html" },
-    { "source": "/preview/day-1-filled", "destination": "/preview/day-1-filled.html" },
-    { "source": "/preview/day-2-filled", "destination": "/preview/day-2-filled.html" },
-    { "source": "/preview/day-3-filled", "destination": "/preview/day-3-filled.html" },
-    { "source": "/preview/toolbox-filled", "destination": "/preview/toolbox-filled.html" },
+    { "source": "/preview", "destination": "/preview/index.html" },
+    { "source": "/preview/:name", "destination": "/preview/:name.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

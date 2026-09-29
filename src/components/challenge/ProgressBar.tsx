@@ -74,7 +74,7 @@ export function ProgressBar({ day }: { day: 1 | 2 | 3 }) {
 
   return (
     <>
-      <Bar>
+      <Bar data-progress-bar="">
         <Inner>
           <Labels>
             <span>יום {day} מתוך 3</span>
