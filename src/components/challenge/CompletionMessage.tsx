@@ -2,8 +2,6 @@ import { CircleCheck, RotateCw } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { useParticipant } from "@/data/participantContext"
-import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
-import { PersonalFeedbackButton } from "./links"
 
 const Wrap = styled.section`
   display: flex;
@@ -29,8 +27,7 @@ const Wrap = styled.section`
 `
 
 export function CompletionMessage() {
-  const { participant, syncState, retrySync } = useParticipant()
-  const coach = useCoachPublicInfo(participant.coachSlug)
+  const { syncState, retrySync } = useParticipant()
 
   if (syncState === "error") {
     return (
@@ -53,8 +50,6 @@ export function CompletionMessage() {
       <p>
         <strong>התשובות שלכם נשמרו ונשלחו אליי.</strong>
       </p>
-      <p>אם תרצו, אתם מוזמנים לפנות אליי בפרטי ואשמח לתת לכם פידבק.</p>
-      <PersonalFeedbackButton firstName={participant.firstName} phone={coach?.phone} />
     </Wrap>
   )
 }

@@ -181,7 +181,6 @@ export const TOOLS: Tool[] = [
       { type: "strong", text: "קודם בוחרים מקור חלבון." },
       { type: "text", text: "אחר כך:" },
       { type: "strong", text: "מוסיפים ירק + פחמימה לפי הצורך." },
-      { type: "text", text: "הכלי הזה מתחבר ישירות לעיקרון של יום 2." },
     ],
   },
   {

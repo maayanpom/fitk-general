@@ -60,13 +60,10 @@ const Segment = styled.div<{ $state: "done" | "current" | "next" }>`
   }
 `
 
-const PERCENT = { 1: 33, 2: 66, 3: 100 } as const
-
 const STATUS_TEXT = { saving: "שומרים...", saved: "נשמר ✓" } as const
 
 export function ProgressBar({ day }: { day: 1 | 2 | 3 }) {
   const { participant, syncState } = useParticipantState()
-  const percent = PERCENT[day]
   const doneDays = [participant?.day1, participant?.day2, participant?.day3].map((d) =>
     Boolean(d?.completedAt),
   )
@@ -77,18 +74,18 @@ export function ProgressBar({ day }: { day: 1 | 2 | 3 }) {
       <Bar data-progress-bar="">
         <Inner>
           <Labels>
-            <span>יום {day} מתוך 3</span>
+            <span>יום {day} מתוך 3</span>{" "}
             <span className="status" role="status" aria-live="polite">
               {status}
             </span>
-            <span>{percent}%</span>
           </Labels>
           <Segments
             role="progressbar"
             aria-label={`יום ${day} מתוך 3`}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={percent}
+            aria-valuemin={1}
+            aria-valuemax={3}
+            aria-valuenow={day}
+            aria-valuetext={`יום ${day} מתוך 3`}
           >
             {([1, 2, 3] as const).map((d) => (
               <Segment
