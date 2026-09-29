@@ -18,6 +18,10 @@
   "rewrites": [
     { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
     { "source": "/preview", "destination": "/preview/index.html" },
+    { "source": "/preview/live/:nonce/version.json", "destination": "/preview/version.json" },
+    { "source": "/preview/live/:nonce/manifest.json", "destination": "/preview/manifest.json" },
+    { "source": "/preview/live/:nonce/agent.md", "destination": "/preview/agent.md" },
+    { "source": "/preview/live/:nonce/:name", "destination": "/preview/:name.html" },
     { "source": "/preview/:name", "destination": "/preview/:name.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

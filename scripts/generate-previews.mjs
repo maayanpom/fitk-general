@@ -270,9 +270,9 @@ try {
     </ul>
     <h2>איך בודקים שיש עדכון</h2>
     <ol>
-      <li>לקרוא את <a href="/preview/version.json">/preview/version.json</a> עם פרמטר חד-פעמי, למשל <code dir="ltr">?t=123456</code>.</li>
+      <li>לקרוא את <code dir="ltr">/preview/live/&lt;מחרוזת חדשה&gt;/version.json</code> (למשל <code dir="ltr">/preview/live/1759148000/version.json</code>). המחרוזת חייבת להיות חדשה בכל פעם, כדי שאף מטמון, גם של כלי הקריאה, לא יענה במקום השרת.</li>
       <li>אם <code>buildId</code> זהה למה שנשמר בפעם הקודמת, אין שינוי.</li>
-      <li>אם שונה: לקרוא את <a href="/preview/manifest.json">/preview/manifest.json</a>, להשוות את <code>sha256</code> של כל דף, ולקרוא מחדש רק דפים ששונו.</li>
+      <li>אם שונה: לקרוא את <code dir="ltr">/preview/live/&lt;מחרוזת חדשה&gt;/manifest.json</code>, להשוות את <code>sha256</code> של כל דף, ולקרוא מחדש רק דפים ששונו.</li>
     </ol>
     <p>הוראות מלאות לסוכן: <a href="/preview/agent.md">/preview/agent.md</a></p>
   </body>
@@ -310,12 +310,18 @@ Note: "-filled" pages show the screen after a participant finished, with sample 
 
 ## Checking for updates (do this before relying on anything you fetched earlier)
 
-1. Fetch /preview/version.json with a throwaway query string so no cache answers it,
-   for example /preview/version.json?t=<current timestamp>.
+1. Fetch the version file through a URL that has never been requested before, so no
+   cache (including your fetch tool's own memory) can answer it:
+     /preview/live/<any new string>/version.json
+   for example /preview/live/1759148000/version.json. Use a NEW string every time
+   (a timestamp or random number). The "live/<string>" part is ignored by the server
+   and only makes the URL unique. This works even if your tool ignores query strings.
+   Fallback if your tool does not ignore them: /preview/version.json?t=<new number>.
 2. If buildId equals the buildId you remembered: nothing changed. Reuse what you have.
-3. If it differs: fetch /preview/manifest.json (same query-string trick). For each page,
+3. If it differs: fetch /preview/live/<new string>/manifest.json (fresh URL again). For each page,
    compare its sha256 with the value you remembered. Re-fetch only the pages whose hash
-   changed (or /preview/site for everything). Then remember the new buildId and hashes.
+   changed (or /preview/live/<new string>/site for everything; every page works under
+   /preview/live/<new string>/<page>). Then remember the new buildId and hashes.
 4. To double-check a page, the "build ..." line at the bottom of each page and its
    <meta name="build-id"> must equal the buildId in version.json.
 
