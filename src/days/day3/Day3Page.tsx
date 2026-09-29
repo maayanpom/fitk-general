@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
@@ -11,15 +10,15 @@ import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
 import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { Day3HappensChoice, Day3HelpChoice, Day3MomentChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import day3Image from "@/assets/day3.jpg"
-import { day2MissingLabel, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "./content"
-import { getDay1Feedback } from "../day1/feedback"
+import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "./content"
+
+const DEFAULT_DELIVERY_TEXT = "הסיכום האישי שלכם יישלח אליכם בוואטסאפ עד 24 שעות."
 
 const Section = styled.section`
   display: flex;
@@ -70,44 +69,39 @@ const Notes = styled.ul`
   line-height: 1.7;
 `
 
-const Summary = styled.ul`
-  margin: 0;
-  padding-inline-start: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  line-height: 1.6;
-`
-
 const Celebration = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   padding: 26px 20px;
   border-radius: calc(var(--radius) * 1.8);
-  background: linear-gradient(160deg, #EDE4FA, #D8C9F0);
+  background: var(--primary);
+  color: var(--primary-foreground);
   text-align: center;
 
   h2 {
     margin: 0;
     font-size: 1.4rem;
     font-weight: 800;
+    line-height: 1.4;
+    color: var(--primary-foreground);
   }
 
   p {
     margin: 0;
-    font-weight: 500;
+    font-size: 1.1rem;
+    font-weight: 600;
     line-height: 1.6;
-  }
-
-  a {
-    height: 52px;
-    border-radius: 999px;
-    font-size: 1.05rem;
-    font-weight: 700;
   }
 `
 
+const KeyLine = styled.p`
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--deep);
+`
 export default function Day3Page() {
   const { participant, updateSection } = useParticipant()
   const { isCompleted, complete, resultRef } = useCompletion("day3")
@@ -126,7 +120,7 @@ export default function Day3Page() {
 
         <WhyItMatters>
           <Subtle style={{ margin: 0 }}>
-            לעיתים קרובות הקושי באוכל קשור לרגע ולא לכוח רצון: מתי אנחנו עייפים, רעבים או לחוצים,
+            לעיתים קרובות הקושי באוכל קשור לרגע ולא לכוח רצון: מתי שאנחנו עייפים, רעבים או לחוצים,
             ומה זמין לנו באותו רגע. כשמבינים מה קורה ברגע הזה, אפשר לשנות דבר קטן אחד במקום לשנות
             הכול.
           </Subtle>
@@ -156,14 +150,14 @@ export default function Day3Page() {
           <QuestionCard>
             <QuestionLabel>
               <StepNumber aria-hidden>2</StepNumber>
-              כשזה קורה, בדרך כלל אני:
+              כשזה קורה, מה בדרך כלל קורה אצלי?
             </QuestionLabel>
             <ChoiceGroup
               value={data.happensChoice}
               onValueChange={(v) =>
                 updateSection("day3", { happensChoice: v as Day3HappensChoice })
               }
-              aria-label="כשזה קורה, בדרך כלל אני"
+              aria-label="כשזה קורה, מה בדרך כלל קורה אצלי?"
             >
               {HAPPENS_OPTIONS.map((o) => (
                 <ChoicePill key={o.value} value={o.value}>
@@ -211,7 +205,7 @@ export default function Day3Page() {
             <li>סביבה (מה זמין לי באותו רגע)</li>
             <li>הרגל של שעה קבועה</li>
           </Notes>
-          <Subtle style={{ margin: 0 }}>לרוב מספיק לשנות אחד מהם.</Subtle>
+          <KeyLine>לרוב מספיק לשנות אחד מהם.</KeyLine>
         </Section>
 
         <DoneButton disabled={!data.momentChoice} onClick={() => void complete()}>
@@ -221,40 +215,16 @@ export default function Day3Page() {
         <ResultArea ref={resultRef}>
           {isCompleted && (
             <>
-              <QuestionCard>
-                <SectionTitle>הסיכום שלכם</SectionTitle>
-                <Summary>
-                  <li>מיום 1: {getDay1Feedback(participant.day1, coach?.longGapHours).body}</li>
-                  <li>מיום 2: בצלחת שבדקתם חסר בדרך כלל: {day2MissingLabel(participant.day2)}.</li>
-                  <li>
-                    מיום 3: הרגע הקשה הוא{" "}
-                    {MOMENT_OPTIONS.find((o) => o.value === data.momentChoice)?.label ?? "-"}, ומה
-                    שיעזור לכם:{" "}
-                    {HELP_OPTIONS.find((o) => o.value === data.helpChoice)?.label ?? "-"}.
-                  </li>
-                </Summary>
-                <CompletionProgress percent={100} />
-              </QuestionCard>
+              <CompletionProgress percent={100} />
 
               <CompletionMessage />
 
               <Celebration>
-                <h2>🎉 סיימתם את שלושת הימים!</h2>
-                <p>
-                  ועכשיו – ארגז כלים קטן שיעזור לכם גם בימים שבהם אין זמן, כוח או חשק להתעסק עם
-                  אוכל.
-                </p>
-                <Button asChild size="lg">
-                  <Link to="/toolbox">לארגז הכלים שלי →</Link>
-                </Button>
+                <h2>🎉 סיימתם את שלושת הימים, וזה לא מובן מאליו.</h2>
+                <p>{coach?.summaryDeliveryText?.trim() || DEFAULT_DELIVERY_TEXT}</p>
               </Celebration>
 
               <CommunityInvite communityUrl={coach?.communityUrl} />
-
-              <Subtle style={{ textAlign: "center" }}>
-                סיימתם את שלושת הימים, וזה לא מובן מאליו. הסיכום האישי יישלח אליכם בוואטסאפ עד יום
-                שישי.
-              </Subtle>
             </>
           )}
         </ResultArea>

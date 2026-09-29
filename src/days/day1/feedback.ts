@@ -24,14 +24,6 @@ function formatHours(minutes: number): string {
 
 const TITLE = "התובנה הראשונה שלכם"
 
-// If a hard point was picked (and isn't "no hard point today"), every branch
-// but D appends a line pointing at it - D explicitly skips this per spec.
-function hardestAppendix(hardestMoment: Day1Data["hardestMoment"]): string {
-  if (!hardestMoment || hardestMoment === "none") return ""
-  const label = HARDEST_OPTIONS.find((o) => o.value === hardestMoment)?.label
-  return label ? ` הנקודה שסימנתם כקשה היא ${label}. ביום 3 נחפש לה פתרון קטן.` : ""
-}
-
 // The longest gap between two consecutive timed points, or null when fewer
 // than two points have a time. Used by the summary draft generator.
 export function getLongestGap(
@@ -71,43 +63,25 @@ export function getDay1Feedback(
     }
   }
 
-  const appendix = hardestAppendix(data.hardestMoment)
-  const timed = points
-    .map(toTimedPoint)
-    .filter((p): p is TimedPoint => p !== null)
-    .sort((a, b) => a.minutes - b.minutes)
+  const label =
+    data.hardestMoment && data.hardestMoment !== "none"
+      ? HARDEST_OPTIONS.find((o) => o.value === data.hardestMoment)?.label
+      : undefined
 
-  if (timed.length < 2) {
-    return {
-      title: TITLE,
-      body: `כדי לראות תמונה צריך לפחות שתי נקודות אכילה עם שעה. אפשר לחזור ולהשלים בערב.${appendix}`,
-    }
+  const sentences: string[] = []
+  if (label) {
+    sentences.push(`${label} היא הרגע שדורש הכי הרבה תשומת לב. ביום 3 נחפש לה פתרון קטן.`)
+  } else if (data.hardestMoment === "none") {
+    sentences.push("יופי, יום בלי נקודה קשה. ביום 3 נבדוק מה עוזר לשמור על זה.")
   }
 
-  let maxGap = 0
-  let gapStart = timed[0]
-  let gapEnd = timed[1]
-  for (let i = 1; i < timed.length; i++) {
-    const gap = timed[i].minutes - timed[i - 1].minutes
-    if (gap > maxGap) {
-      maxGap = gap
-      gapStart = timed[i - 1]
-      gapEnd = timed[i]
-    }
+  const gap = getLongestGap(data)
+  if (gap && gap.hours >= longGapHours) {
+    sentences.push(
+      `המרווח הארוך ביותר היה כ-${formatHours(gap.hours * 60)} שעות, בין ${gap.from} ל-${gap.to}.`,
+    )
   }
 
-  if (maxGap / 60 >= longGapHours) {
-    return {
-      title: TITLE,
-      body:
-        `המרווח הארוך ביותר ביום שלכם הוא כ-${formatHours(maxGap)} שעות, בין ${gapStart.time} ל-${gapEnd.time}. ` +
-        `מרווחים ארוכים יכולים להקשות על בחירות רגועות בהמשך היום. אין צורך לשנות כלום עכשיו. ` +
-        `ביום 3 נחפש יחד פתרון קטן שמתאים לכם.${appendix}`,
-    }
-  }
-
-  return {
-    title: TITLE,
-    body: `נקודות האכילה שלכם מפוזרות בצורה די סדירה. זו נקודת פתיחה טובה. ביום 3 נחפש יחד מה עוד אפשר לחזק.${appendix}`,
-  }
+  if (sentences.length === 0) sentences.push("תודה ששיתפתם. ביום 3 נחפש יחד פתרון קטן.")
+  return { title: TITLE, body: sentences.join(" ") }
 }

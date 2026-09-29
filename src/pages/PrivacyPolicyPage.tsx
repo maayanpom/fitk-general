@@ -60,6 +60,7 @@ const PLATFORM_OWNER: CoachPublicInfo = {
   privacyUrl: null,
   requireHoldonConsent: true,
   longGapHours: 5,
+  summaryDeliveryText: null,
 }
 
 export default function PrivacyPolicyPage() {

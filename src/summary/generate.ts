@@ -1,5 +1,6 @@
 import type { Participant } from "@/data/participant"
 import { getLongestGap } from "@/days/day1/feedback"
+import { joinHebrew, missingComponents, PLATE_LABELS, PLATE_TIPS } from "@/days/day2/feedback"
 import { HARDEST_OPTIONS } from "@/days/day1/types"
 import { MOMENT_OPTIONS } from "@/days/day3/content"
 
@@ -98,23 +99,15 @@ function day1Finding(p: Participant, longGapHours: number): Finding {
 }
 
 function day2Finding(p: Participant): Finding {
-  const { protein, vegetables, carbs } = p.day2
-  if (!protein) {
-    return {
-      text: "בצלחת שבדקתם לא היה מקור חלבון. תוספת קטנה, כמו ביצים או יוגורט, יכולה לעזור לארוחה להחזיק יותר.",
-      strength: false,
-    }
+  const missing = missingComponents(p.day2)
+  if (missing.length === 0) {
+    return { text: "בצלחת שבדקתם היה חלבון, פחמימה וירקות. שילוב מצוין.", strength: true }
   }
-  if (!vegetables) {
-    return { text: "בצלחת חסרו ירקות. כמה חתיכות בצד מספיקות כדי להתחיל.", strength: false }
+  const list = joinHebrew(missing.map((c) => PLATE_LABELS[c]))
+  return {
+    text: `בצלחת שבדקתם חסר: ${list}. ${missing.map((c) => PLATE_TIPS[c]).join(" ")}`,
+    strength: false,
   }
-  if (!carbs) {
-    return {
-      text: "בצלחת לא הייתה פחמימה. היא חלק רגיל מהצלחת ונותנת אנרגיה, אין צורך לוותר עליה. פרוסת לחם או פרי הן דוגמאות פשוטות.",
-      strength: false,
-    }
-  }
-  return { text: "בצלחת שבדקתם היה שילוב מגוון. יפה.", strength: true }
 }
 
 const DAY3_FINDINGS: Record<string, string> = {

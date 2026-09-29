@@ -8,6 +8,7 @@ import { DoneButton } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
+import { TomorrowCard } from "@/components/challenge/TomorrowCard"
 import { useCompletion } from "@/components/challenge/useCompletion"
 import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
@@ -56,28 +57,12 @@ const Notes = styled.ul`
   line-height: 1.7;
 `
 
-const Tip = styled.p`
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: calc(var(--radius) * 1.2);
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-  font-size: 1rem;
-  line-height: 1.7;
-`
-
 const Extras = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   text-align: center;
-`
-
-const Teaser = styled.p`
-  margin: 0;
-  color: var(--secondary-foreground);
-  line-height: 1.6;
 `
 
 const WhatsAppButton = styled(Button)`
@@ -157,22 +142,11 @@ export default function Day1Page() {
         </TaskBox>
 
         <Section>
-          <SectionTitle>שלושה דברים שעושים סדר ביום</SectionTitle>
-          <Notes>
-            <li>נקודת אכילה אחת קבועה שלא זזה, אפילו קטנה.</li>
-            <li>
-              <strong>תכנון והתארגנות:</strong> לתכנן בערך מה נאכל היום, ולוודא שיש בבית את מה
-              שצריך או שאפשר לקנות אותו בקלות.
-            </li>
-            <li>כוס מים ליד, כדי שהשתייה לא תלויה בזיכרון.</li>
-          </Notes>
+          <Subtle style={{ margin: 0 }}>
+            <strong>תכנון והתארגנות:</strong> לתכנן בערך מה נאכל היום, ולוודא שיש בבית את מה שצריך
+            או שאפשר לקנות אותו בקלות.
+          </Subtle>
         </Section>
-
-        <Tip>
-          💡 בוקר עמוס? בחרו דבר אחד שאפשר להכין מראש בערב, או נקודה פשוטה אחת שאפשר לקחת בדרך.
-        </Tip>
-
-        <Tip>🔄 משהו לא הלך כמתוכנן? לא מפצים ולא מדלגים. חוזרים לנקודה הבאה כרגיל.</Tip>
 
         <Section>
           <DoneButton disabled={!data.hardestMoment} onClick={() => void complete()}>
@@ -187,10 +161,9 @@ export default function Day1Page() {
               <CompletionMessage />
               <Extras>
                 <CompletionProgress percent={33} />
-                <Teaser>
-                  מחר: הצלחת שלי. נבנה יחד צלחת מהיום האמיתי שלכם. הקישור יגיע אליכם בוואטסאפ
-                  בבוקר.
-                </Teaser>
+                <TomorrowCard>
+                  מחר: הצלחת שלי. נבנה יחד צלחת מהיום האמיתי שלכם. הקישור יגיע אליכם בוואטסאפ בבוקר.
+                </TomorrowCard>
                 <Subtle style={{ margin: 0 }}>אפשר לחזור ולערוך את התשובות עד סוף היום.</Subtle>
                 {coach?.phone && (
                   <WhatsAppButton variant="outline" asChild>

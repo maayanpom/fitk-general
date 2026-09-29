@@ -30,6 +30,7 @@ const Title = styled.h3`
 const Body = styled.p`
   margin: 0;
   line-height: 1.7;
+  white-space: pre-line;
   color: var(--secondary-foreground);
 `
 

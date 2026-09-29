@@ -327,7 +327,7 @@ returns jsonb
 language sql stable security definer set search_path = public
 as $$
   select to_jsonb(t) from (
-    select name, email, phone, community_url, slug, privacy_url, require_holdon_consent, long_gap_hours
+    select name, email, phone, community_url, slug, privacy_url, require_holdon_consent, long_gap_hours, summary_delivery_text
     from public.coaches where id = coach_id
   ) t;
 $$;
@@ -337,7 +337,7 @@ returns jsonb
 language sql stable security definer set search_path = public
 as $$
   select to_jsonb(t) from (
-    select name, email, phone, community_url, slug, privacy_url, require_holdon_consent, long_gap_hours
+    select name, email, phone, community_url, slug, privacy_url, require_holdon_consent, long_gap_hours, summary_delivery_text
     from public.coaches where slug = coach_slug
   ) t;
 $$;

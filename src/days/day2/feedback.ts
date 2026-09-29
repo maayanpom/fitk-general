@@ -7,30 +7,49 @@ export type Day2Feedback = {
 
 const TITLE = "התובנה שלכם מהצלחת"
 
-// One message, by priority: protein first, then vegetables, then carbs
-// - fat doesn't affect the outcome. "יש הכול"/nothing-checked are the two
-// remaining edge cases.
-export function getDay2Feedback({ protein, vegetables, carbs, fat }: Day2Data): Day2Feedback {
-  if (!protein && !vegetables && !carbs && !fat) {
-    return { title: TITLE, body: "כדי לקבל תובנה סמנו לפחות מרכיב אחד." }
+// A balanced meal = protein + carbs + vegetables. Fat is not required.
+export type PlateComponent = "protein" | "carbs" | "vegetables"
+
+const ORDER: PlateComponent[] = ["protein", "carbs", "vegetables"]
+
+export const PLATE_LABELS: Record<PlateComponent, string> = {
+  protein: "חלבון",
+  carbs: "פחמימה",
+  vegetables: "ירקות",
+}
+
+export const PLATE_TIPS: Record<PlateComponent, string> = {
+  protein: "חלבון: ביצים, קוטג', יוגורט, טונה מספיקים.",
+  carbs: "פחמימה: פרוסת לחם, מנת אורז, תפוח אדמה או פרי.",
+  vegetables: "ירקות: מלפפון או עגבנייה חתוכים בצד.",
+}
+
+export function missingComponents(data: Pick<Day2Data, PlateComponent>): PlateComponent[] {
+  return ORDER.filter((c) => !data[c])
+}
+
+// "חלבון, פחמימה וירקות"
+export function joinHebrew(items: string[]): string {
+  if (items.length <= 1) return items.join("")
+  return `${items.slice(0, -1).join(", ")} ו${items[items.length - 1]}`
+}
+
+export function getDay2Feedback(data: Day2Data): Day2Feedback {
+  if (!data.protein && !data.vegetables && !data.carbs && !data.fat) {
+    return { title: TITLE, body: "כדי לקבל תובנה, סמנו לפחות מרכיב אחד." }
   }
-  if (!protein) {
-    return {
-      title: TITLE,
-      body: "בצלחת הזו לא סימנתם מקור חלבון. הוספה קטנה, למשל ביצים, קוטג', יוגורט או טונה, יכולה לעזור לארוחה להחזיק יותר זמן.",
-    }
+
+  const missing = missingComponents(data)
+  if (missing.length === 0) {
+    return { title: TITLE, body: "יש בצלחת חלבון, פחמימה וירקות. שילוב מצוין." }
   }
-  if (!vegetables) {
-    return {
-      title: TITLE,
-      body: "לא סימנתם ירקות. כמה חתיכות בצד מספיקות כדי להתחיל.",
-    }
+
+  const list = joinHebrew(missing.map((c) => PLATE_LABELS[c]))
+  return {
+    title: TITLE,
+    body: [
+      `בצלחת שבדקתם חסר: ${list}. ארוחה מאוזנת כוללת חלבון, פחמימה וירקות.`,
+      ...missing.map((c) => PLATE_TIPS[c]),
+    ].join("\n"),
   }
-  if (!carbs) {
-    return {
-      title: TITLE,
-      body: "לא סימנתם מקור פחמימה. פחמימה היא חלק רגיל מהצלחת והיא נותנת אנרגיה. פרוסת לחם או פרי הן דוגמאות פשוטות, ואין צורך לוותר עליה.",
-    }
-  }
-  return { title: TITLE, body: "יש לכם בצלחת שילוב מגוון. יפה." }
 }

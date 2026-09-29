@@ -224,6 +224,7 @@ export type CoachPublicInfo = {
   privacyUrl: string | null
   requireHoldonConsent: boolean
   longGapHours: number
+  summaryDeliveryText: string | null
 }
 
 function publicFromJson(data: unknown): CoachPublicInfo | null {
@@ -238,6 +239,7 @@ function publicFromJson(data: unknown): CoachPublicInfo | null {
     privacyUrl: (d.privacy_url as string | null) ?? null,
     requireHoldonConsent: d.require_holdon_consent !== false,
     longGapHours: typeof d.long_gap_hours === "number" ? d.long_gap_hours : 5,
+    summaryDeliveryText: (d.summary_delivery_text as string | null) ?? null,
   }
 }
 

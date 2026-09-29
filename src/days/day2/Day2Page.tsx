@@ -8,6 +8,7 @@ import { DoneButton } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
+import { TomorrowCard } from "@/components/challenge/TomorrowCard"
 import { useCompletion } from "@/components/challenge/useCompletion"
 import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
@@ -104,28 +105,12 @@ const Notes = styled.ul`
   line-height: 1.7;
 `
 
-const Tip = styled.p`
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: calc(var(--radius) * 1.2);
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-  font-size: 1rem;
-  line-height: 1.7;
-`
-
 const Extras = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   text-align: center;
-`
-
-const Teaser = styled.p`
-  margin: 0;
-  color: var(--secondary-foreground);
-  line-height: 1.6;
 `
 
 export default function Day2Page() {
@@ -204,8 +189,6 @@ export default function Day2Page() {
           </Notes>
         </Section>
 
-        <Tip>🍽️ ארוחה מהירה או מוכנה היא גם ארוחה. מספיק להשלים בה מרכיב אחד.</Tip>
-
         <DoneButton disabled={!data.mealChosen} onClick={() => void complete()}>
           סיימתי ✓
         </DoneButton>
@@ -216,9 +199,8 @@ export default function Day2Page() {
               <FeedbackCard title={feedback.title} body={feedback.body} />
               <CompletionMessage />
               <Extras>
-                <Subtle style={{ margin: 0 }}>אין צורך שכל ארוחה תהיה מושלמת.</Subtle>
                 <CompletionProgress percent={66} />
-                <Teaser>מחר: הפתרון שלי. נבחר רגע אחד ונמצא לו פתרון קטן.</Teaser>
+                <TomorrowCard>מחר: הפתרון שלי. נבחר רגע אחד ונמצא לו פתרון קטן.</TomorrowCard>
               </Extras>
             </>
           )}
