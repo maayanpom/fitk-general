@@ -21,7 +21,7 @@ const Card = styled.label`
   font-weight: 500;
   line-height: 1.4;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
 
   /* The whole card is the radio's hit target; the radio itself stays invisible. */
   button[role="radio"] {
@@ -48,13 +48,21 @@ const Card = styled.label`
     display: inline-flex;
   }
 
+  &:active {
+    transform: scale(0.97);
+  }
+
   &:has(:focus-visible) {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
+
+    &:active {
+      transform: none;
+    }
   }
 `
 

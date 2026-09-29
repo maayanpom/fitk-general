@@ -70,7 +70,7 @@ export function getDay1Feedback(
 
   const sentences: string[] = []
   if (label) {
-    sentences.push(`${label} היא הרגע שדורש הכי הרבה תשומת לב. ביום 3 נחפש לה פתרון קטן.`)
+    sentences.push(`הנקודה הקשה שבחרתם: ${label}. זה הרגע שדורש הכי הרבה תשומת לב. ביום 3 נחפש לו פתרון קטן.`)
   } else if (data.hardestMoment === "none") {
     sentences.push("יופי, יום בלי נקודה קשה. ביום 3 נבדוק מה עוזר לשמור על זה.")
   }

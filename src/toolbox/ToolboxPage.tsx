@@ -6,7 +6,7 @@ import { CommunityInvite, PersonalFeedbackButton } from "@/components/challenge/
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
-import toolboxImage from "@/assets/toolbox.jpg"
+import toolboxImage from "@/assets/toolbox.webp"
 import { HeroImage } from "@/components/challenge/HeroImage"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipant } from "@/data/participantContext"
@@ -74,7 +74,7 @@ const CardList = styled.div`
 
 const Board = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 `
 
@@ -84,21 +84,23 @@ const BoardTile = styled.button<{ $saved: boolean }>`
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 14px 6px 12px;
+  padding: 16px 10px 14px;
+  min-height: 112px;
+  justify-content: center;
   border-radius: 18px;
   border: 1.5px solid ${({ $saved }) => ($saved ? "var(--primary)" : "transparent")};
   background: var(--card);
   box-shadow: 0 4px 14px -10px oklch(0.3 0.06 300 / 0.35);
   color: var(--foreground);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   text-align: center;
   cursor: pointer;
 
   .emoji {
-    font-size: 1.9rem;
+    font-size: 2.1rem;
   }
 
   .star {
@@ -223,7 +225,7 @@ export default function ToolboxPage() {
           <SectionTitle>⭐ הכלים שבחרתי לעצמי</SectionTitle>
           {savedTools.length === 0 ? (
             <Subtle>
-              עוד לא בחרתם כלים. לחצו על "שמירה לעצמי" בכלים שמתאימים לחיים שלכם, מספיקים 2 עד 4.
+              עוד לא בחרתם כלים. לחצו על "שמירה לעצמי" בכלים שמתאימים לחיים שלכם, מספיקים 2 עד 4.
             </Subtle>
           ) : (
             <CardList>
@@ -234,7 +236,7 @@ export default function ToolboxPage() {
           )}
         </MyTools>
 
-        <DoneButton onClick={() => void complete()}>סיימתי ✓</DoneButton>
+        <DoneButton onClick={() => void complete()}>סיימתי לבחור ✓</DoneButton>
 
         <ResultArea ref={resultRef}>
           {isCompleted && syncState === "error" && <CompletionMessage />}

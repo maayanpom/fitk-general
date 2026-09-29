@@ -27,9 +27,9 @@ const Overlay = styled.div`
   padding: 18px 18px 20px;
   background: linear-gradient(
     to top,
-    rgb(43 33 64 / 0.92) 0%,
-    rgb(43 33 64 / 0.55) 55%,
-    rgb(43 33 64 / 0.1) 100%
+    rgb(43 33 64 / 0.86) 0%,
+    rgb(43 33 64 / 0.4) 50%,
+    rgb(43 33 64 / 0) 100%
   );
 
   h1 {
@@ -65,7 +65,7 @@ type Props = {
 export function HeroImage({ image, badge, title }: Props) {
   return (
     <Figure>
-      <img src={image} alt="" />
+      <img src={image} alt="" fetchPriority="high" decoding="async" />
       <Overlay>
         <Badge aria-hidden>{badge}</Badge>
         <h1>{title}</h1>

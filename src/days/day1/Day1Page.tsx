@@ -4,7 +4,7 @@ import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
-import { DoneButton } from "@/components/challenge/DoneButton"
+import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { whatsAppLinkForPhone } from "@/config"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
-import day1Image from "@/assets/day1.jpg"
+import day1Image from "@/assets/day1.webp"
 import { EatingPointFields } from "./EatingPointFields"
 import { getDay1Feedback } from "./feedback"
 import { HardestMomentPicker } from "./HardestMomentPicker"
@@ -152,6 +152,7 @@ export default function Day1Page() {
           <DoneButton disabled={!data.hardestMoment} onClick={() => void complete()}>
             סיימתי ✓
           </DoneButton>
+          {!data.hardestMoment && <DoneHint>כדי לסיים, בחרו איפה הכי קשה היום (או שאין נקודה קשה)</DoneHint>}
         </Section>
 
         <ResultArea ref={resultRef}>

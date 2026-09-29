@@ -1,14 +1,16 @@
-import { useEffect } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
-import AdminPage from "@/admin/AdminPage"
 import { RequireParticipant } from "@/components/challenge/RequireParticipant"
 import { ROOT_REDIRECT } from "@/config"
 import { ParticipantProvider } from "@/data/ParticipantProvider"
-import CoachSignupPage from "@/pages/CoachSignupPage"
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage"
 import RegisterPage from "@/pages/RegisterPage"
 import StartPage from "@/pages/StartPage"
 import { PAGES, type ChallengePage } from "@/routes"
+
+// Coach-only screens are loaded on demand, so participants never download them.
+const AdminPage = lazy(() => import("@/admin/AdminPage"))
+const CoachSignupPage = lazy(() => import("@/pages/CoachSignupPage"))
 
 function PageRoute({ page }: { page: ChallengePage }) {
   useEffect(() => {
@@ -41,6 +43,7 @@ function FallbackRedirect() {
 
 export default function App() {
   return (
+    <Suspense fallback={null}>
     <Routes>
       {PAGES.map((page) => (
         <Route
@@ -62,5 +65,6 @@ export default function App() {
       <Route path="/:slug/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<FallbackRedirect />} />
     </Routes>
+    </Suspense>
   )
 }

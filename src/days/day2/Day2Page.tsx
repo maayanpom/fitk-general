@@ -4,7 +4,7 @@ import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
-import { DoneButton } from "@/components/challenge/DoneButton"
+import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
 import { FeedbackCard } from "@/components/challenge/FeedbackCard"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
@@ -14,7 +14,7 @@ import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import type { Day2MealChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
-import day2Image from "@/assets/day2.jpg"
+import day2Image from "@/assets/day2.webp"
 import { MEAL_OPTIONS } from "./content"
 import { getDay2Feedback } from "./feedback"
 
@@ -180,18 +180,21 @@ export default function Day2Page() {
           </Grid>
         </Section>
 
-        <Section>
-          <SectionTitle>איך משלימים צלחת בלי מאמץ</SectionTitle>
-          <Notes>
-            <li>חסר חלבון? ביצים, קוטג', יוגורט, טונה מספיקים.</li>
-            <li>חסרים ירקות? מלפפון או עגבנייה חתוכים בצד, גם בלי לבשל.</li>
-            <li>חסרה פחמימה? פרוסת לחם או פרי. אין צורך לוותר עליה.</li>
-          </Notes>
-        </Section>
+        {!isCompleted && (
+          <Section>
+            <SectionTitle>איך משלימים צלחת בלי מאמץ</SectionTitle>
+            <Notes>
+              <li>חסר חלבון? ביצים, קוטג', יוגורט, טונה מספיקים.</li>
+              <li>חסרים ירקות? מלפפון או עגבנייה חתוכים בצד, גם בלי לבשל.</li>
+              <li>חסרה פחמימה? פרוסת לחם או פרי. אין צורך לוותר עליה.</li>
+            </Notes>
+          </Section>
+        )}
 
         <DoneButton disabled={!data.mealChosen} onClick={() => void complete()}>
           סיימתי ✓
         </DoneButton>
+        {!data.mealChosen && <DoneHint>כדי לסיים, בחרו ארוחה אחת</DoneHint>}
 
         <ResultArea ref={resultRef}>
           {isCompleted && (

@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import { useParticipantState } from "@/data/participantContext"
 
 const Bar = styled.div`
   position: fixed;
@@ -22,55 +23,84 @@ const Inner = styled.div`
 const Labels = styled.div`
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--deep);
   line-height: 1.2;
+
+  .status {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+  }
 `
 
-const Track = styled.div`
+// Three segments, one per day: done = solid, current = medium, next = light.
+const Segments = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+`
+
+const Segment = styled.div<{ $state: "done" | "current" | "next" }>`
   height: 8px;
   border-radius: 999px;
-  background: var(--lavender);
-  overflow: hidden;
-`
+  background: ${({ $state }) =>
+    $state === "done"
+      ? "var(--primary)"
+      : $state === "current"
+        ? "color-mix(in oklab, var(--primary) 45%, var(--lavender))"
+        : "var(--lavender)"};
+  transition: background 0.6s ease;
 
-const Fill = styled.div`
-  height: 100%;
-  border-radius: 999px;
-  background: var(--primary);
-`
-
-// Space the fixed bar takes up, so page content starts below it.
-const Spacer = styled.div`
-  height: 30px;
-  margin-bottom: -12px;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `
 
 const PERCENT = { 1: 33, 2: 66, 3: 100 } as const
 
+const STATUS_TEXT = { saving: "שומרים...", saved: "נשמר ✓" } as const
+
 export function ProgressBar({ day }: { day: 1 | 2 | 3 }) {
+  const { participant, syncState } = useParticipantState()
   const percent = PERCENT[day]
+  const doneDays = [participant?.day1, participant?.day2, participant?.day3].map((d) =>
+    Boolean(d?.completedAt),
+  )
+  const status = syncState === "saving" || syncState === "saved" ? STATUS_TEXT[syncState] : ""
+
   return (
     <>
       <Bar>
         <Inner>
           <Labels>
             <span>יום {day} מתוך 3</span>
+            <span className="status" role="status" aria-live="polite">
+              {status}
+            </span>
             <span>{percent}%</span>
           </Labels>
-          <Track
+          <Segments
             role="progressbar"
             aria-label={`יום ${day} מתוך 3`}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}
           >
-            <Fill style={{ width: `${percent}%` }} />
-          </Track>
+            {([1, 2, 3] as const).map((d) => (
+              <Segment
+                key={d}
+                $state={doneDays[d - 1] ? "done" : d === day ? "current" : "next"}
+              />
+            ))}
+          </Segments>
         </Inner>
       </Bar>
-      <Spacer aria-hidden />
+      {/* Space the fixed bar takes up, so page content starts below it. */}
+      <div aria-hidden style={{ height: 30, marginBottom: -12 }} />
     </>
   )
 }

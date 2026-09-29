@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { PartyPopper } from "lucide-react"
+import { MessageCircle, PartyPopper } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import styled from "styled-components"
 import { DoneButton } from "@/components/challenge/DoneButton"
@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getCoachPublicBySlug, type CoachPublicInfo } from "@/data/coach"
+import { isValidEmail, isValidPhone, normalizePhone } from "@/admin/phone"
+import { whatsAppLinkForPhone } from "@/config"
 import { supabase } from "@/data/supabase"
 
 const Center = styled(PageInner)`
@@ -70,6 +72,39 @@ const Honeypot = styled.div`
   pointer-events: none;
 `
 
+const FieldError = styled.p`
+  margin: 0;
+  color: var(--destructive);
+  font-size: 0.95rem;
+  line-height: 1.5;
+`
+
+const Steps = styled.ol`
+  margin: 0;
+  padding: 14px 16px;
+  padding-inline-start: 36px;
+  border-radius: calc(var(--radius) * 1.2);
+  background: var(--selected);
+  color: var(--deep);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.6;
+`
+
+const NextButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+`
+
 const ErrorText = styled.p`
   margin: 0;
   color: var(--destructive);
@@ -105,6 +140,7 @@ export default function RegisterPage() {
   const [consentMessages, setConsentMessages] = useState(false)
   const [consentHoldon, setConsentHoldon] = useState(false)
   const [website, setWebsite] = useState("") // honeypot, must stay empty
+  const [touched, setTouched] = useState({ name: false, phone: false, email: false })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [done, setDone] = useState(false)
@@ -134,10 +170,17 @@ export default function RegisterPage() {
   }, [coach])
 
   const holdonRequired = coach?.requireHoldonConsent ?? true
+  const errors = {
+    name: name.trim() ? "" : "נא למלא שם מלא",
+    phone: isValidPhone(normalizePhone(phone))
+      ? ""
+      : "מספר הטלפון נראה לא תקין. למשל 050-1234567",
+    email: isValidEmail(email.trim()) ? "" : "כתובת המייל נראית לא תקינה. למשל name@gmail.com",
+  }
   const canSubmit =
-    name.trim() &&
-    phone.trim() &&
-    email.trim() &&
+    !errors.name &&
+    !errors.phone &&
+    !errors.email &&
     consentPrivacy &&
     consentMessages &&
     (consentHoldon || !holdonRequired) &&
@@ -168,7 +211,11 @@ export default function RegisterPage() {
 
     if (error) {
       console.error("Failed to submit registration", error)
-      setError("משהו השתבש. נסו שוב, ואם זה חוזר - כתבו לנו בוואטסאפ.")
+      setError(
+        error.message?.includes("too many requests")
+          ? "יש עומס כרגע. נסו שוב בעוד כמה דקות."
+          : "משהו השתבש. נסו שוב, ואם זה חוזר - כתבו לנו בוואטסאפ.",
+      )
       setSubmitting(false)
       return
     }
@@ -206,7 +253,17 @@ export default function RegisterPage() {
           <ThankYou>
             <PartyPopper size={40} />
             <PageTitle as="h1">נרשמתם!</PageTitle>
-            <p>נחזור אליכם בוואטסאפ.</p>
+            <p>נחזור אליכם בוואטסאפ עם קישור אישי לימי האתגר.</p>
+            {coach.phone && (
+              <NextButton
+                href={whatsAppLinkForPhone(coach.phone, "היי, נרשמתי לאתגר 🙂")}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle size={18} />
+                אפשר גם לכתוב לנו כבר עכשיו
+              </NextButton>
+            )}
           </ThankYou>
         </Center>
       </PageShell>
@@ -222,6 +279,12 @@ export default function RegisterPage() {
             <Subtle>האתגר של {coach.name}: 3 ימים חוזרים לשגרה</Subtle>
           </header>
 
+          <Steps>
+            <li>נרשמים כאן, זה לוקח דקה.</li>
+            <li>{coach.name} מסדרת עבורכם רישום חינמי ל-HoldOn.</li>
+            <li>מקבלים בוואטסאפ קישור אישי לכל יום, כמה דקות ביום.</li>
+          </Steps>
+
           <Subtle>
             האתגר בשיתוף HoldOn. ההשתתפות מותנית ברישום חינמי לאתר HoldOn, שיבוצע עבורכם על ידי{" "}
             {coach.name} לאחר אישורכם.
@@ -233,8 +296,11 @@ export default function RegisterPage() {
               id="reg-name"
               autoComplete="name"
               value={name}
+              aria-invalid={touched.name && Boolean(errors.name)}
+              onBlur={() => setTouched((t) => ({ ...t, name: true }))}
               onChange={(e) => setName(e.target.value)}
             />
+            {touched.name && errors.name && <FieldError>{errors.name}</FieldError>}
           </Field>
 
           <Field>
@@ -245,8 +311,11 @@ export default function RegisterPage() {
               dir="ltr"
               autoComplete="tel"
               value={phone}
+              aria-invalid={touched.phone && Boolean(errors.phone)}
+              onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
               onChange={(e) => setPhone(e.target.value)}
             />
+            {touched.phone && errors.phone && <FieldError>{errors.phone}</FieldError>}
           </Field>
 
           <Field>
@@ -257,8 +326,11 @@ export default function RegisterPage() {
               dir="ltr"
               autoComplete="email"
               value={email}
+              aria-invalid={touched.email && Boolean(errors.email)}
+              onBlur={() => setTouched((t) => ({ ...t, email: true }))}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {touched.email && errors.email && <FieldError>{errors.email}</FieldError>}
           </Field>
 
           <Honeypot aria-hidden="true">

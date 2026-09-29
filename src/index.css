@@ -137,5 +137,9 @@
     }
   h1, h2, h3 {
     color: var(--deep);
+    text-wrap: balance;
+    }
+  p, li {
+    text-wrap: pretty;
     }
 }

@@ -92,8 +92,9 @@ function day1Finding(p: Participant, longGapHours: number): Finding {
       strength: false,
     }
   }
+  const hours = Number.isInteger(gap.hours) ? String(gap.hours) : gap.hours.toFixed(1)
   return {
-    text: "נקודות האכילה שלכם מפוזרות בצורה סדירה. זו בסיס טוב לבנות עליו.",
+    text: `ביום 1 המרווח הארוך ביותר בין הנקודות היה כ-${hours} שעות בלבד. זו בסיס טוב לבנות עליו.`,
     strength: true,
   }
 }

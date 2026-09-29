@@ -3,7 +3,7 @@ import { CompletionMessage } from "@/components/challenge/CompletionMessage"
 import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
-import { DoneButton } from "@/components/challenge/DoneButton"
+import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
 import { CommunityInvite } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import type { Day3HappensChoice, Day3HelpChoice, Day3MomentChoice } from "@/data/participant"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
-import day3Image from "@/assets/day3.jpg"
+import day3Image from "@/assets/day3.webp"
 import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "./content"
 
 const DEFAULT_DELIVERY_TEXT = "הסיכום האישי שלכם יישלח אליכם בוואטסאפ עד 24 שעות."
@@ -58,17 +58,6 @@ const QuestionCard = styled.div`
   box-shadow: 0 1px 2px oklch(0.3 0.06 300 / 0.06), 0 6px 18px -10px oklch(0.3 0.06 300 / 0.18);
 `
 
-const Notes = styled.ul`
-  margin: 0;
-  padding-inline-start: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: var(--muted-foreground);
-  font-size: 1rem;
-  line-height: 1.7;
-`
-
 const Celebration = styled.section`
   display: flex;
   flex-direction: column;
@@ -78,6 +67,18 @@ const Celebration = styled.section`
   background: var(--primary);
   color: var(--primary-foreground);
   text-align: center;
+  animation: reveal 0.6s ease-out both;
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.96);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   h2 {
     margin: 0;
@@ -92,6 +93,25 @@ const Celebration = styled.section`
     font-size: 1.1rem;
     font-weight: 600;
     line-height: 1.6;
+  }
+`
+
+const Chips = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  li {
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--selected);
+    border: 1.5px solid var(--lavender);
+    color: var(--deep);
+    font-weight: 600;
+    line-height: 1.4;
   }
 `
 
@@ -199,18 +219,19 @@ export default function Day3Page() {
 
         <Section>
           <SectionTitle>ארבעה דברים שיוצרים רגע קשה</SectionTitle>
-          <Notes>
+          <Chips>
             <li>רעב חזק</li>
             <li>עייפות</li>
             <li>סביבה (מה זמין לי באותו רגע)</li>
             <li>הרגל של שעה קבועה</li>
-          </Notes>
+          </Chips>
           <KeyLine>לרוב מספיק לשנות אחד מהם.</KeyLine>
         </Section>
 
         <DoneButton disabled={!data.momentChoice} onClick={() => void complete()}>
           סיימתי ✓
         </DoneButton>
+        {!data.momentChoice && <DoneHint>כדי לסיים, בחרו את הרגע הקשה בשאלה הראשונה</DoneHint>}
 
         <ResultArea ref={resultRef}>
           {isCompleted && (

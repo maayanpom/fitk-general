@@ -51,7 +51,7 @@ export function CompletionMessage() {
         המשימה הושלמה
       </h3>
       <p>
-        <strong>התשובות שלך נשמרו ונשלחו אליי.</strong>
+        <strong>התשובות שלכם נשמרו ונשלחו אליי.</strong>
       </p>
       <p>אם תרצו, אתם מוזמנים לפנות אליי בפרטי ואשמח לתת לכם פידבק.</p>
       <PersonalFeedbackButton firstName={participant.firstName} phone={coach?.phone} />

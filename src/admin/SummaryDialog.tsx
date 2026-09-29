@@ -19,6 +19,9 @@ import { generateSummary } from "@/summary/generate"
 import { hasPlaceholders, renderWhatsappText } from "@/summary/render"
 import { formatDateTime, saveSummary, type Registration, type SummaryRow } from "./adminData"
 
+// The wording rules: no weight talk, calorie goals or dieting language.
+const FORBIDDEN_WORDS = /משקל|קלורי\S*|דיאט\S*|לרזות|להרזות/g
+
 const Stack = styled.div`
   display: flex;
   flex-direction: column;
@@ -208,6 +211,7 @@ function SummaryBody({
   }
 
   const notReady = !draft.trim() || hasPlaceholders(draft)
+  const forbidden = [...new Set(draft.match(FORBIDDEN_WORDS) ?? [])]
 
   return (
     <Stack>
@@ -249,6 +253,12 @@ function SummaryBody({
           />
           {draft && hasPlaceholders(draft) && (
             <Note>יש בטיוטה שדות שעוד לא מולאו, כמו {"{קוד}"} או {"{תאריך}"}. השלימו אותם לפני השליחה.</Note>
+          )}
+
+          {forbidden.length > 0 && (
+            <Note style={{ color: "var(--destructive)" }}>
+              בטיוטה יש מילים שלא מתאימות לכללי הניסוח: {forbidden.join(", ")}. כדאי להסיר אותן.
+            </Note>
           )}
 
           <Actions>
