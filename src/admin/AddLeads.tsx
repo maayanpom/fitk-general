@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent, type FormEvent } from "react"
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -207,6 +207,7 @@ export function CsvImportDialog({
   existing: Registration[]
   onImported: () => void
 }) {
+  const fileInput = useRef<HTMLInputElement>(null)
   const [data, setData] = useState<string[][]>([])
   const [fileName, setFileName] = useState("")
   const [mapping, setMapping] = useState<ColumnMapping | null>(null)
@@ -325,14 +326,26 @@ export function CsvImportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <input type="file" accept=".csv,text/csv" onChange={(e) => void onFile(e)} />
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".csv,text/csv"
+          hidden
+          onChange={(e) => void onFile(e)}
+        />
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
+            בחירת קובץ CSV
+          </Button>
+          {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
+        </div>
 
         {mapping && (
           <>
             <Card as="div">
               {select("fullName", "שם מלא")}
-              {select("firstName", "שם פרטי")}
-              {select("lastName", "שם משפחה")}
+              {mapping.fullName < 0 && select("firstName", "שם פרטי")}
+              {mapping.fullName < 0 && select("lastName", "שם משפחה")}
               {select("phone", "טלפון")}
               {select("email", "מייל")}
               {select("createdAt", "זמן כניסה")}
@@ -361,7 +374,7 @@ export function CsvImportDialog({
                       <td>{r.fullName}</td>
                       <td dir="ltr">{r.phone}</td>
                       <td dir="ltr">{r.email}</td>
-                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("he-IL") : "—"}</td>
+                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" }) : "—"}</td>
                       <td>
                         {r.error ??
                           (r.duplicate === "existing"

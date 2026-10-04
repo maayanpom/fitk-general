@@ -107,8 +107,9 @@ export function parseCreated(raw: string): string {
   const ap = t?.[3]?.toLowerCase()
   if (ap === "pm" && h < 12) h += 12
   if (ap === "am" && h === 12) h = 0
-  const date = new Date(y, mo - 1, d, h, mi)
-  if (Number.isNaN(date.getTime()) || date.getMonth() !== mo - 1 || date > new Date()) return ""
+  // The CRM export is in UTC; the UI shows it in Israel time.
+  const date = new Date(Date.UTC(y, mo - 1, d, h, mi))
+  if (Number.isNaN(date.getTime()) || date.getUTCMonth() !== mo - 1 || date > new Date()) return ""
   return date.toISOString()
 }
 

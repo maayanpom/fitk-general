@@ -185,9 +185,9 @@ export async function saveSummary(
   if (error) throw error
 }
 
-const dateTime = new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short" })
-const time = new Intl.DateTimeFormat("he-IL", { timeStyle: "short" })
-const dayOnly = new Intl.DateTimeFormat("he-IL", { dateStyle: "short" })
+const dateTime = new Intl.DateTimeFormat("he-IL", { timeZone: "Asia/Jerusalem", dateStyle: "short", timeStyle: "short" })
+const time = new Intl.DateTimeFormat("he-IL", { timeZone: "Asia/Jerusalem", timeStyle: "short" })
+const dayOnly = new Intl.DateTimeFormat("he-IL", { timeZone: "Asia/Jerusalem", dateStyle: "short" })
 
 export function formatDateTime(iso: string) {
   return iso ? dateTime.format(new Date(iso)) : "—"
