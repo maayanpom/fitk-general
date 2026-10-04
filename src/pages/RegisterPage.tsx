@@ -12,6 +12,16 @@ import { isValidEmail, isValidPhone, normalizePhone } from "@/admin/phone"
 import { whatsAppLinkForPhone } from "@/config"
 import { supabase } from "@/data/supabase"
 
+const SERVER_ERRORS: Record<string, string> = {
+  "too many requests": "יש עומס כרגע. נסו שוב בעוד כמה דקות.",
+  "invalid phone": "מספר הטלפון אינו תקין. בדקו ונסו שוב.",
+  "invalid email": "כתובת האימייל אינה תקינה. בדקו ונסו שוב.",
+  "name, phone and email are required": "יש למלא שם, טלפון ואימייל.",
+  "privacy and messages consents are required": "יש לאשר את מדיניות הפרטיות וקבלת הודעות.",
+  "holdon consent is required": "יש לאשר את ההרשמה ל-HoldOn.",
+  "unknown coach link": "הקישור אינו תקין. פנו למאמנת שלכם לקבלת קישור חדש.",
+}
+
 const Center = styled(PageInner)`
   min-height: calc(100dvh - 64px);
   justify-content: center;
@@ -211,10 +221,12 @@ export default function RegisterPage() {
 
     if (error) {
       console.error("Failed to submit registration", error)
+      const message = error.message ?? ""
+      const known = Object.entries(SERVER_ERRORS).find(([key]) => message.includes(key))
       setError(
-        error.message?.includes("too many requests")
-          ? "יש עומס כרגע. נסו שוב בעוד כמה דקות."
-          : "משהו השתבש. נסו שוב, ואם זה חוזר - כתבו לנו בוואטסאפ.",
+        known
+          ? known[1]
+          : `משהו השתבש (${message || error.code || "שגיאה לא ידועה"}). נסו שוב, ואם זה חוזר - כתבו לנו בוואטסאפ.`,
       )
       setSubmitting(false)
       return

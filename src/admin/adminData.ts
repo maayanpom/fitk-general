@@ -99,7 +99,7 @@ export async function fetchRegistrations(): Promise<Registration[]> {
   }))
 }
 
-export type NewLead = { full_name: string; phone: string; email: string }
+export type NewLead = { full_name: string; phone: string; email: string; created_at?: string }
 
 // Manual add (5.2) and Meta CSV import (5.3). One consent confirmation covers
 // the whole call; the server dedupes by phone and email and normalizes phones.

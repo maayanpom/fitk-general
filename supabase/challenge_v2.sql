@@ -25,6 +25,7 @@ as $$
     when d = '' then ''
     when d like '00%' then substr(d, 3)
     when d like '0%' then '972' || substr(d, 2)
+    when d like '9720%' then '972' || substr(d, 5)
     else d
   end
   from (select regexp_replace(coalesce(p, ''), '\D', '', 'g') as d) t;
@@ -73,6 +74,7 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+#variable_conflict use_column
 declare
   v_coach public.coaches%rowtype;
   v_name text := left(trim(coalesce(full_name, '')), 100);
@@ -107,13 +109,13 @@ begin
   end if;
 
   -- Rate limit per coach link: at most 30 sign-ups in 10 minutes.
-  if (select count(*) from public.registrations
-      where coach_id = v_coach.id and created_at > now() - interval '10 minutes') >= 30 then
+  if (select count(*) from public.registrations rg
+      where rg.coach_id = v_coach.id and rg.created_at > now() - interval '10 minutes') >= 30 then
     raise exception 'too many requests';
   end if;
 
   -- Duplicate by phone: succeed silently (never reveal who is registered).
-  if exists (select 1 from public.registrations where coach_id = v_coach.id and phone = v_phone) then
+  if exists (select 1 from public.registrations rg where rg.coach_id = v_coach.id and rg.phone = v_phone) then
     return;
   end if;
 
@@ -155,6 +157,7 @@ declare
   v_name text;
   v_phone text;
   v_email text;
+  v_created timestamptz;
   v_inserted int := 0;
   v_skipped int := 0;
 begin
@@ -175,6 +178,15 @@ begin
     v_name := left(trim(coalesce(r ->> 'full_name', '')), 100);
     v_phone := public.normalize_phone(left(coalesce(r ->> 'phone', ''), 30));
     v_email := lower(left(trim(coalesce(r ->> 'email', '')), 200));
+    -- Optional original sign-up time from the CSV; never in the future.
+    begin
+      v_created := nullif(r ->> 'created_at', '')::timestamptz;
+    exception when others then
+      v_created := null;
+    end;
+    if v_created is null or v_created > now() then
+      v_created := now();
+    end if;
 
     if v_name = '' or length(v_phone) < 9 or length(v_phone) > 15 then
       v_skipped := v_skipped + 1;
@@ -192,13 +204,13 @@ begin
 
     insert into public.registrations (
       coach_id, full_name, phone, email, source, import_batch, imported_at,
-      consent_privacy, consent_holdon, consent_messages_at, consent_holdon_at
+      consent_privacy, consent_holdon, consent_messages_at, consent_holdon_at, created_at
     )
     values (
       v_coach, v_name, v_phone, v_email, p_source,
       case when p_source = 'meta_ad' then left(p_batch, 100) end,
       case when p_source = 'meta_ad' then now() end,
-      false, true, now(), now()
+      false, true, v_created, v_created, v_created
     );
     v_inserted := v_inserted + 1;
   end loop;

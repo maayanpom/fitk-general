@@ -276,7 +276,12 @@ export function CsvImportDialog({
     try {
       const batch = `${fileName.replace(/\.csv$/i, "")} ${new Date().toISOString().slice(0, 10)}`
       const res = await addRegistrations(
-        valid.map((r) => ({ full_name: r.fullName, phone: r.phone, email: r.email })),
+        valid.map((r) => ({
+          full_name: r.fullName,
+          phone: r.phone,
+          email: r.email,
+          created_at: r.createdAt || undefined,
+        })),
         "meta_ad",
         batch,
       )
@@ -330,6 +335,7 @@ export function CsvImportDialog({
               {select("lastName", "שם משפחה")}
               {select("phone", "טלפון")}
               {select("email", "מייל")}
+              {select("createdAt", "זמן כניסה")}
             </Card>
 
             <p className="m-0 text-sm">
@@ -344,6 +350,7 @@ export function CsvImportDialog({
                     <th>שם</th>
                     <th>טלפון</th>
                     <th>מייל</th>
+                    <th>כניסה</th>
                     <th>סטטוס</th>
                   </tr>
                 </thead>
@@ -354,6 +361,7 @@ export function CsvImportDialog({
                       <td>{r.fullName}</td>
                       <td dir="ltr">{r.phone}</td>
                       <td dir="ltr">{r.email}</td>
+                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("he-IL") : "—"}</td>
                       <td>
                         {r.error ??
                           (r.duplicate === "existing"

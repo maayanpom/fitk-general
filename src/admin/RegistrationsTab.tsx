@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Check, Copy, MessageCircle, Trash2 } from "lucide-react"
+import { Check, FileText, MessageCircle, Trash2 } from "lucide-react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -80,9 +80,15 @@ const ErrorText = styled.p`
 
 const Cell = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 6px;
-  align-items: flex-start;
+  align-items: center;
+  white-space: nowrap;
+`
+
+const Name = styled.div`
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
 `
 
 const Muted = styled.span`
@@ -90,30 +96,7 @@ const Muted = styled.span`
   font-size: 0.8rem;
 `
 
-const dayDate = new Intl.DateTimeFormat("he-IL", { dateStyle: "short" })
-
-function CodeButton({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(code)
-          setCopied(true)
-          setTimeout(() => setCopied(false), 2000)
-        } catch {
-          // Clipboard unavailable, nothing else to do.
-        }
-      }}
-    >
-      {copied ? <Check /> : <Copy />}
-      קוד
-    </Button>
-  )
-}
+const dayDate = new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric" })
 
 export function RegistrationsTab({
   coach,
@@ -219,10 +202,10 @@ export function RegistrationsTab({
               <TableHead className="text-start">מייל</TableHead>
               <TableHead className="text-start">מקור</TableHead>
               <TableHead className="text-start">HoldOn</TableHead>
-              <TableHead className="text-start">קוד וקישורים</TableHead>
+              <TableHead className="text-start">קישורים</TableHead>
               <TableHead className="text-center">התקדמות</TableHead>
               <TableHead className="text-start">סיכום</TableHead>
-              <TableHead />
+              <TableHead className="text-start">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -241,7 +224,12 @@ export function RegistrationsTab({
               const summary = r.participantId ? summaryById.get(r.participantId) : undefined
               return (
                 <TableRow key={r.id}>
-                  <TableCell>{r.fullName}</TableCell>
+                  <TableCell>
+                    <Name>
+                      {r.fullName}
+                      <Muted>{formatRelativeDay(r.createdAt)}</Muted>
+                    </Name>
+                  </TableCell>
                   <TableCell>
                     <PhoneLink
                       href={whatsAppLinkForPhone(r.phone, `היי ${r.fullName}, `)}
@@ -260,36 +248,32 @@ export function RegistrationsTab({
                     {r.importBatch && <Muted> · {r.importBatch}</Muted>}
                   </TableCell>
                   <TableCell>
-                    <Cell>
+                    <Button
+                      size="sm"
+                      variant={r.holdonRegisteredAt ? "secondary" : "outline"}
+                      disabled={busyId === r.id}
+                      onClick={() =>
+                        void run(
+                          r.id,
+                          () => setHoldonRegistered(r.id, !r.holdonRegisteredAt),
+                          "העדכון נכשל. נסו שוב.",
+                        )
+                      }
+                    >
                       {r.holdonRegisteredAt ? (
-                        <span>כן, {dayDate.format(new Date(r.holdonRegisteredAt))}</span>
+                        <>
+                          <Check /> נרשם/ה {dayDate.format(new Date(r.holdonRegisteredAt))}
+                        </>
                       ) : (
-                        <span>לא</span>
+                        "סמנו כנרשם/ה"
                       )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={busyId === r.id}
-                        onClick={() =>
-                          void run(
-                            r.id,
-                            () => setHoldonRegistered(r.id, !r.holdonRegisteredAt),
-                            "העדכון נכשל. נסו שוב.",
-                          )
-                        }
-                      >
-                        {r.holdonRegisteredAt ? "ביטול סימון" : "נרשמתי"}
-                      </Button>
-                    </Cell>
+                    </Button>
                   </TableCell>
                   <TableCell>
                     {r.participantId ? (
-                      <Cell>
-                        <CodeButton code={r.participantId} />
-                        <Button size="sm" variant="outline" onClick={() => setLinksFor(r)}>
-                          קישורים
-                        </Button>
-                      </Cell>
+                      <Button size="sm" variant="outline" onClick={() => setLinksFor(r)}>
+                        קישורים
+                      </Button>
                     ) : holdonBlocked(r) ? (
                       <Muted>אין הסכמה ל-HoldOn</Muted>
                     ) : (
@@ -300,23 +284,21 @@ export function RegistrationsTab({
                           void run(
                             r.id,
                             () => createParticipantForRegistration(r.id),
-                            "יצירת הקוד נכשלה. נסו שוב.",
+                            "יצירת הקישורים נכשלה. נסו שוב.",
                           )
                         }
                       >
-                        יצירת קוד וקישורים
+                        יצירת קישורים
                       </Button>
                     )}
                   </TableCell>
                   <TableCell className="text-center">{p ? `${completed} מתוך 3` : "—"}</TableCell>
                   <TableCell>
                     {p ? (
-                      <Cell>
-                        <span>{summary?.sentAt ? "נשלח" : summary?.draft ? "טיוטה" : "—"}</span>
-                        <Button size="sm" variant="outline" onClick={() => onOpenSummary(p, r)}>
-                          סיכום
-                        </Button>
-                      </Cell>
+                      <Button size="sm" variant="outline" onClick={() => onOpenSummary(p, r)}>
+                        סיכום
+                        {summary?.sentAt ? " · נשלח" : summary?.draft ? " · טיוטה" : ""}
+                      </Button>
                     ) : (
                       "—"
                     )}
@@ -325,7 +307,7 @@ export function RegistrationsTab({
                     <Cell>
                       {p && (
                         <Button size="sm" variant="outline" onClick={() => onOpenAnswers(p)}>
-                          תשובות
+                          <FileText /> תשובות
                         </Button>
                       )}
                       <Button
@@ -349,7 +331,6 @@ export function RegistrationsTab({
                       >
                         <Trash2 />
                       </Button>
-                      <Muted>{formatRelativeDay(r.createdAt)}</Muted>
                     </Cell>
                   </TableCell>
                 </TableRow>
