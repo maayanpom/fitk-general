@@ -57,13 +57,18 @@ export function ParticipantLinkPicker({ participantId }: { participantId: string
 // participants identify with the phone number they registered with.
 export function CoachDayLinks({ coachSlug }: { coachSlug: string }) {
   const [copied, setCopied] = useState<string | null>(null)
-  const days = [1, 2, 3]
+  const links = [
+    { key: "day-1", label: "יום 1" },
+    { key: "day-2", label: "יום 2" },
+    { key: "day-3", label: "יום 3" },
+    { key: "toolbox", label: "ארגז כלים" },
+  ]
 
-  const copy = async (day: number) => {
+  const copy = async (key: string) => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/${coachSlug}/day-${day}`)
-      setCopied(`day-${day}`)
-      setTimeout(() => setCopied((c) => (c === `day-${day}` ? null : c)), 2000)
+      await navigator.clipboard.writeText(`${window.location.origin}/${coachSlug}/${key}`)
+      setCopied(key)
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 2000)
     } catch {
       // Clipboard API unavailable - nothing else to do here.
     }
@@ -72,10 +77,10 @@ export function CoachDayLinks({ coachSlug }: { coachSlug: string }) {
   return (
     <Grid>
       <span>קישורים קבועים למשתתפים:</span>
-      {days.map((day) => (
-        <Button key={day} type="button" size="sm" variant="outline" onClick={() => void copy(day)}>
-          {copied === `day-${day}` ? <Check /> : <Copy />}
-          יום {day}
+      {links.map(({ key, label }) => (
+        <Button key={key} type="button" size="sm" variant="outline" onClick={() => void copy(key)}>
+          {copied === key ? <Check /> : <Copy />}
+          {label}
         </Button>
       ))}
     </Grid>
