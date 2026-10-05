@@ -7,6 +7,7 @@ export type ParticipantContextValue = {
   participant: Participant | null
   syncState: SyncState
   adoptById: (code: string) => Promise<boolean>
+  identifyByPhone: (coachSlug: string, phone: string) => Promise<boolean>
   updateSection: <S extends Section>(section: S, patch: Partial<Participant[S]>) => void
   completeSection: (section: Section) => Promise<boolean>
   retrySync: () => Promise<boolean>

@@ -7,6 +7,8 @@ export type Day2Feedback = {
 
 const TITLE = "התובנה שלכם מהצלחת"
 
+const GOAL = "זכרו, המטרה שלנו: שלוש ארוחות מאוזנות ביום."
+
 // A balanced meal = protein + carbs + vegetables. Fat is not required.
 export type PlateComponent = "protein" | "carbs" | "vegetables"
 
@@ -36,12 +38,12 @@ export function joinHebrew(items: string[]): string {
 
 export function getDay2Feedback(data: Day2Data): Day2Feedback {
   if (!data.protein && !data.vegetables && !data.carbs && !data.fat) {
-    return { title: TITLE, body: "כדי לקבל תובנה, סמנו לפחות מרכיב אחד." }
+    return { title: TITLE, body: ["כדי לקבל תובנה, סמנו לפחות מרכיב אחד.", GOAL].join("\n") }
   }
 
   const missing = missingComponents(data)
   if (missing.length === 0) {
-    return { title: TITLE, body: "יש בצלחת חלבון, פחמימה וירקות. שילוב מצוין." }
+    return { title: TITLE, body: ["יש בצלחת חלבון, פחמימה וירקות. שילוב מצוין.", GOAL].join("\n") }
   }
 
   const list = joinHebrew(missing.map((c) => PLATE_LABELS[c]))
@@ -50,6 +52,7 @@ export function getDay2Feedback(data: Day2Data): Day2Feedback {
     body: [
       `בצלחת שבדקתם חסר: ${list}. ארוחה מאוזנת כוללת חלבון, פחמימה וירקות.`,
       ...missing.map((c) => PLATE_TIPS[c]),
+      GOAL,
     ].join("\n"),
   }
 }

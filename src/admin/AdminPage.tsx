@@ -30,6 +30,7 @@ import { CoachesList } from "./CoachesList"
 import { CoachSettings } from "./CoachSettings"
 import { ParticipantDetails } from "./ParticipantDetails"
 import { ParticipantLinkPicker } from "./ParticipantLinkPicker"
+import { ResultsTab } from "./ResultsTab"
 import { RegistrationsTab } from "./RegistrationsTab"
 import { SummaryDialog } from "./SummaryDialog"
 
@@ -206,7 +207,7 @@ function Login() {
   )
 }
 
-type Tab = "registrations" | "participants" | "settings" | "coaches"
+type Tab = "registrations" | "participants" | "results" | "settings" | "coaches"
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("registrations")
@@ -312,6 +313,13 @@ function Dashboard() {
             </TabButton>
             <TabButton
               type="button"
+              $active={tab === "results"}
+              onClick={() => setTab("results")}
+            >
+              תוצאות
+            </TabButton>
+            <TabButton
+              type="button"
               $active={tab === "settings"}
               onClick={() => setTab("settings")}
             >
@@ -389,6 +397,10 @@ function Dashboard() {
               onOpenAnswers={setSelected}
               onOpenSummary={(participant, registration) => setSummaryFor({ participant, registration })}
             />
+          )}
+
+          {tab === "results" && (
+            <ResultsTab registrations={registrations} participants={participants} />
           )}
 
           {tab === "settings" && (

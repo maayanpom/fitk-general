@@ -52,3 +52,32 @@ export function ParticipantLinkPicker({ participantId }: { participantId: string
     </Grid>
   )
 }
+
+// The three fixed links a coach shares with everyone: no personal parameters,
+// participants identify with the phone number they registered with.
+export function CoachDayLinks({ coachSlug }: { coachSlug: string }) {
+  const [copied, setCopied] = useState<string | null>(null)
+  const days = [1, 2, 3]
+
+  const copy = async (day: number) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/${coachSlug}/day-${day}`)
+      setCopied(`day-${day}`)
+      setTimeout(() => setCopied((c) => (c === `day-${day}` ? null : c)), 2000)
+    } catch {
+      // Clipboard API unavailable - nothing else to do here.
+    }
+  }
+
+  return (
+    <Grid>
+      <span>קישורים קבועים למשתתפים:</span>
+      {days.map((day) => (
+        <Button key={day} type="button" size="sm" variant="outline" onClick={() => void copy(day)}>
+          {copied === `day-${day}` ? <Check /> : <Copy />}
+          יום {day}
+        </Button>
+      ))}
+    </Grid>
+  )
+}

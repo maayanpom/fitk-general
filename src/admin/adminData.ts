@@ -58,6 +58,7 @@ export type Registration = {
   holdonRegisteredAt: string | null
   importBatch: string | null
   participantId: string | null
+  coachNotes: string
   createdAt: string
 }
 
@@ -73,6 +74,7 @@ type RegistrationRow = {
   holdon_registered_at: string | null
   import_batch: string | null
   participant_id: string | null
+  coach_notes: string | null
   created_at: string
 }
 
@@ -95,6 +97,7 @@ export async function fetchRegistrations(): Promise<Registration[]> {
     holdonRegisteredAt: row.holdon_registered_at,
     importBatch: row.import_batch,
     participantId: row.participant_id,
+    coachNotes: row.coach_notes ?? "",
     createdAt: row.created_at,
   }))
 }
@@ -126,6 +129,16 @@ export async function setHoldonRegistered(registrationId: string, registered: bo
   const { error } = await supabase.rpc("set_holdon_registered", {
     p_registration: registrationId,
     p_registered: registered,
+  })
+  if (error) throw error
+}
+
+// Free-text coach notes about a person (e.g. "no WhatsApp").
+export async function setCoachNotes(registrationId: string, notes: string) {
+  if (!supabase) throw new Error("Supabase is not connected")
+  const { error } = await supabase.rpc("coach_set_notes", {
+    p_registration: registrationId,
+    p_notes: notes,
   })
   if (error) throw error
 }

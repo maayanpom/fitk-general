@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react"
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom"
 import { RequireParticipant } from "@/components/challenge/RequireParticipant"
 import { ROOT_REDIRECT } from "@/config"
 import { ParticipantProvider } from "@/data/ParticipantProvider"
@@ -17,8 +17,10 @@ function PageRoute({ page }: { page: ChallengePage }) {
     document.title = page.title
   }, [page.title])
 
+  const { coachSlug } = useParams<{ coachSlug?: string }>()
+
   return (
-    <RequireParticipant>
+    <RequireParticipant coachSlug={coachSlug}>
       <page.Component />
     </RequireParticipant>
   )
@@ -49,6 +51,18 @@ export default function App() {
         <Route
           key={page.slug}
           path={`/${page.slug}`}
+          element={
+            <ParticipantProvider>
+              <PageRoute page={page} />
+            </ParticipantProvider>
+          }
+        />
+      ))}
+      {/* Fixed per-coach links: /<coach>/day-1, /<coach>/day-2, /<coach>/day-3, /<coach>/toolbox */}
+      {PAGES.map((page) => (
+        <Route
+          key={`coach-${page.slug}`}
+          path={`/:coachSlug/${page.slug.replace(/^challenge-/, "")}`}
           element={
             <ParticipantProvider>
               <PageRoute page={page} />

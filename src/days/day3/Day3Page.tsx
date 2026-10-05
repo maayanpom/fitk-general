@@ -213,17 +213,17 @@ export default function Day3Page() {
               value={data.extraNote}
               onChange={(e) => updateSection("day3", { extraNote: e.target.value })}
             />
-            <Subtle style={{ margin: 0 }}>לא צריך לכתוב מידע רפואי.</Subtle>
           </QuestionCard>
         </Section>
 
         <Section>
-          <SectionTitle>ארבעה דברים שיוצרים רגע קשה</SectionTitle>
+          <SectionTitle>דברים שיוצרים רגע קשה</SectionTitle>
           <Chips>
             <li>רעב חזק</li>
             <li>עייפות</li>
             <li>סביבה (מה זמין לי באותו רגע)</li>
             <li>הרגל של שעה קבועה</li>
+            <li>מצב רגשי</li>
           </Chips>
           <KeyLine>לרוב מספיק לשנות אחד מהם.</KeyLine>
         </Section>

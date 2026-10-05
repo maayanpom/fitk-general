@@ -19,6 +19,7 @@ import {
   createParticipantForRegistration,
   deletePerson,
   formatRelativeDay,
+  setCoachNotes,
   setHoldonRegistered,
   SOURCE_LABELS,
   type LeadSource,
@@ -26,7 +27,7 @@ import {
   type SummaryRow,
 } from "./adminData"
 import { CsvImportDialog, ManualAdd } from "./AddLeads"
-import { ParticipantLinkPicker } from "./ParticipantLinkPicker"
+import { CoachDayLinks, ParticipantLinkPicker } from "./ParticipantLinkPicker"
 
 const Stack = styled.div`
   display: flex;
@@ -96,6 +97,22 @@ const Muted = styled.span`
   font-size: 0.8rem;
 `
 
+// Saves on blur, only when the text changed.
+function NotesInput({ registration, onSave }: { registration: Registration; onSave: (text: string) => void }) {
+  const [text, setText] = useState(registration.coachNotes)
+  return (
+    <Input
+      aria-label={`הערות על ${registration.fullName}`}
+      placeholder="הערה"
+      maxLength={2000}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={() => text !== registration.coachNotes && onSave(text)}
+      className="min-w-40"
+    />
+  )
+}
+
 const dayDate = new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric" })
 
 export function RegistrationsTab({
@@ -157,6 +174,7 @@ export function RegistrationsTab({
 
   return (
     <Stack>
+      <CoachDayLinks coachSlug={coach.slug} />
       <ManualAdd onAdded={reload} />
 
       <Toolbar>
@@ -205,13 +223,14 @@ export function RegistrationsTab({
               <TableHead className="text-start">קישורים</TableHead>
               <TableHead className="text-center">התקדמות</TableHead>
               <TableHead className="text-start">סיכום</TableHead>
+              <TableHead className="text-start">הערות</TableHead>
               <TableHead className="text-start">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground">
+                <TableCell colSpan={10} className="text-center text-muted-foreground">
                   אין נרשמים להצגה
                 </TableCell>
               </TableRow>
@@ -302,6 +321,14 @@ export function RegistrationsTab({
                     ) : (
                       "—"
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <NotesInput
+                      registration={r}
+                      onSave={(text) =>
+                        void run(r.id, () => setCoachNotes(r.id, text), "שמירת ההערה נכשלה. נסו שוב.")
+                      }
+                    />
                   </TableCell>
                   <TableCell>
                     <Cell>
