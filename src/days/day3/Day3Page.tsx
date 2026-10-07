@@ -203,10 +203,10 @@ export default function Day3Page() {
           <QuestionCard>
             <QuestionLabel>
               <StepNumber aria-hidden>3</StepNumber>
-              מה יכול להקל על הרגע הזה?
+              דמיינו שברגע הזה יש לכם משהו שעושה לכם קל. מה זה?
             </QuestionLabel>
             <Subtle style={{ margin: 0 }}>אפשר לבחור כמה.</Subtle>
-            <MultiChoiceGroup aria-label="מה יכול להקל על הרגע הזה?">
+            <MultiChoiceGroup aria-label="דמיינו שברגע הזה יש לכם משהו שעושה לכם קל. מה זה?">
               {HELP_OPTIONS.map((o) => (
                 <MultiChoicePill
                   key={o.value}

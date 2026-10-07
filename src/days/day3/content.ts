@@ -19,12 +19,12 @@ export const HAPPENS_OPTIONS: { value: Day3HappensChoice; label: string }[] = [
 ]
 
 export const HELP_OPTIONS: { value: Day3HelpChoice; label: string }[] = [
-  { value: "readyMade", label: "משהו מוכן מראש" },
-  { value: "quickMeal", label: "ארוחה מהירה וזמינה" },
-  { value: "proteinAvailable", label: "שיהיה לי מקור חלבון זמין" },
-  { value: "takeAlong", label: "משהו שאפשר לקחת איתי" },
-  { value: "shortPlan", label: "תכנון קצר מראש" },
-  { value: "noTimeSolution", label: "פתרון שיעזור לי כשאין לי זמן" },
+  { value: "readyMade", label: "משהו מוכן שמחכה לי" },
+  { value: "quickMeal", label: "ארוחה מהירה, בלי להתארגן עליה" },
+  { value: "proteinAvailable", label: "מקור חלבון שכבר זמין לי" },
+  { value: "takeAlong", label: "משהו שאפשר לקחת מהבית" },
+  { value: "shortPlan", label: "לדעת מראש מה אוכלים" },
+  { value: "noTimeSolution", label: "פתרון שעובד גם כשאין לי זמן בכלל" },
   { value: "other", label: "משהו אחר" },
 ]
 

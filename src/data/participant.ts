@@ -48,6 +48,9 @@ export type ToolboxData = {
   fiveMinuteMeal: string
   bagSnack: string
   homeChecklist: string[]
+  // The chosen tool they most want to work this week ("unsure" when they don't know yet).
+  anchorTool: string
+  anchorNote: string
   completedAt: string
 }
 
@@ -93,6 +96,8 @@ const emptyToolbox = (): ToolboxData => ({
   fiveMinuteMeal: "",
   bagSnack: "",
   homeChecklist: [],
+  anchorTool: "",
+  anchorNote: "",
   completedAt: "",
 })
 

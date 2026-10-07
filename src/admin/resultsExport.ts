@@ -2,8 +2,16 @@ import type { Participant } from "@/data/participant"
 import { HARDEST_OPTIONS, MEALS } from "@/days/day1/types"
 import { MEAL_OPTIONS } from "@/days/day2/content"
 import { describeChoices, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
+import { pickScenario, productFit, SCENARIO_TITLES, type ProductFit } from "@/toolbox/matching"
 import { TOOLS_BY_ID } from "@/toolbox/tools"
 import { formatDateTime, SOURCE_LABELS, type Registration } from "./adminData"
+
+const PRODUCT_FIT_LABEL: Record<ProductFit, string> = {
+  wakeShake: "ווייק-שייק",
+  myShia: "מיי-שיא",
+  both: "שניהם",
+  none: "אין",
+}
 
 export type ResultColumn = {
   header: string
@@ -76,6 +84,26 @@ export const RESULT_COLUMNS: ResultColumn[] = [
     header: "בחרה מוצר",
     value: (_, p) =>
       (p?.toolbox.selectedTools ?? []).some((id) => TOOLS_BY_ID[id]?.isProduct) ? "כן" : "לא",
+  },
+  {
+    header: "כלי עוגן",
+    value: (_, p) => {
+      const a = p?.toolbox.anchorTool
+      return a === "unsure" ? "עוד לא יודעים" : a ? (TOOLS_BY_ID[a]?.name ?? "") : ""
+    },
+  },
+  // Coach-only helpers for the personal conversation.
+  {
+    header: "התאמה למוצר",
+    value: (_, p) => (p?.day3.completedAt ? PRODUCT_FIT_LABEL[productFit(p)] : ""),
+  },
+  {
+    header: "תרחיש סיכום מומלץ",
+    value: (_, p) => {
+      if (!p?.day3.completedAt) return ""
+      const s = pickScenario(p)
+      return s === "manual" ? "בדיקה ידנית" : `${s}. ${SCENARIO_TITLES[s]}`
+    },
   },
   { header: "הערות המאמן/ת", value: (r) => r.coachNotes },
 ]

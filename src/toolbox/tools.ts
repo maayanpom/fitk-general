@@ -18,6 +18,8 @@ export type Tool = {
   summary: string
   blocks: ToolBlock[]
   isProduct?: boolean
+  /** Products only: how the card reads when it answers a need the participant raised. */
+  framed?: { emoji: string; name: string; summary: string }
 }
 
 // Order matters: product tools (shake, My-Shia) always come last.
@@ -312,6 +314,11 @@ export const TOOLS: Tool[] = [
     heading: "כשאין זמן לעצור לארוחה",
     summary: "אפשרות זמינה לארוחה כשאין זמן או כוח להתארגן.",
     isProduct: true,
+    framed: {
+      emoji: "🥤",
+      name: "ארוחה כשאין זמן להתארגן",
+      summary: "ווייק-שייק הוא אחת האפשרויות כשאין זמן או כוח להתארגן על ארוחה.",
+    },
     blocks: [],
   },
   {
@@ -321,6 +328,12 @@ export const TOOLS: Tool[] = [
     heading: "כשמחפשים אפשרות נוחה לצד אוכל",
     summary: "10 רכיבים תזונתיים במוצר אחד – משקה פשוט להכנה במים, שאפשר לשלב בשגרה היומית לצד תזונה מגוונת.",
     isProduct: true,
+    framed: {
+      emoji: "🍑",
+      name: "משהו פשוט שמשתלב בשגרה",
+      summary:
+        "מיי-שיא הוא משקה פשוט להכנה במים, עם 10 רכיבים תזונתיים, שאפשר לשלב בשגרה היומית לצד תזונה מגוונת.",
+    },
     blocks: [],
   },
 ]

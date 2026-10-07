@@ -58,6 +58,13 @@ const Text = styled.span`
   }
 `
 
+const Because = styled.em`
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--primary);
+`
+
 const Actions = styled.div`
   display: flex;
   align-items: center;
@@ -79,16 +86,22 @@ const More = styled.button`
 type Props = {
   tool: Tool
   onOpen: (tool: Tool) => void
+  /** Product card phrased as the answer to a need (only when the participant raised it). */
+  framed?: boolean
+  /** "בגלל ש..." line shown on the closest-match tools. */
+  because?: string
 }
 
-export function ToolCard({ tool, onOpen }: Props) {
+export function ToolCard({ tool, onOpen, framed, because }: Props) {
+  const view = framed && tool.framed ? tool.framed : { emoji: tool.emoji, name: tool.name, summary: tool.summary }
   return (
     <Card>
       <Open type="button" onClick={() => !tool.isProduct && onOpen(tool)}>
-        <Icon aria-hidden>{tool.emoji}</Icon>
+        <Icon aria-hidden>{view.emoji}</Icon>
         <Text>
-          <strong>{tool.name}</strong>
-          <span>{tool.summary}</span>
+          <strong>{view.name}</strong>
+          <span>{view.summary}</span>
+          {because && <Because>{because}</Because>}
         </Text>
       </Open>
       <Actions>

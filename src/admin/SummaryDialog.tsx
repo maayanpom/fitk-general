@@ -13,8 +13,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { whatsAppLinkForPhone } from "@/config"
 import type { Coach } from "@/data/coach"
 import type { Participant } from "@/data/participant"
-import { generateSummary } from "@/summary/generate"
-import { hasPlaceholders, renderWhatsappText } from "@/summary/render"
+import { generateSummary, type ProductOption } from "@/summary/build"
+import { hasPlaceholders } from "@/summary/render"
+import { SCENARIO_TITLES, type ScenarioId } from "@/toolbox/matching"
 import { formatDateTime, saveSummary, type Registration, type SummaryRow } from "./adminData"
 
 // The wording rules: no weight talk, calorie goals or dieting language.
@@ -137,16 +138,19 @@ function SummaryBody({
 }) {
   const [draft, setDraft] = useState(summary?.draft ?? "")
   const [sentAt, setSentAt] = useState(summary?.sentAt ?? null)
+  const [include, setInclude] = useState<ProductOption[]>([])
+  const [offered, setOffered] = useState<ProductOption[]>([])
+  const [scenario, setScenario] = useState<ScenarioId | null>(null)
   const [notice, setNotice] = useState<{ kind: "concern"; reasons: string[] } | { kind: "info"; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
 
-  const generate = () => {
+  const generate = (products: ProductOption[] = include) => {
     const result = generateSummary(participant, {
-      longGapHours: coach.longGapHours,
-      communityUrl: coach.communityUrl,
+      coachName: coach.name,
       toolboxLink: `${window.location.origin}/${coach.slug}/toolbox`,
+      includeProducts: products,
     })
 
     if (result.kind === "concern") {
@@ -161,7 +165,15 @@ function SummaryBody({
       return
     }
     setNotice(null)
-    setDraft(renderWhatsappText(result.data, coach.name, coach.summaryDeliveryText))
+    setScenario(result.scenario)
+    setOffered(result.productOptions)
+    setDraft(result.text)
+  }
+
+  const toggleProduct = (option: ProductOption) => {
+    const next = include.includes(option) ? include.filter((o) => o !== option) : [...include, option]
+    setInclude(next)
+    generate(next)
   }
 
   const persist = async (nextSentAt: string | null) => {
@@ -195,8 +207,19 @@ function SummaryBody({
   return (
     <Stack>
       <Actions>
-        <Button onClick={generate}>{draft ? "יצירת טיוטה מחדש" : "יצירת טיוטה"}</Button>
+        <Button onClick={() => generate()}>{draft ? "יצירת טיוטה מחדש" : "יצירת טיוטה"}</Button>
       </Actions>
+
+      {scenario && <Note>תרחיש מומלץ: {SCENARIO_TITLES[scenario]}</Note>}
+      {offered.length > 0 && scenario && scenario <= 5 && (
+        <Actions>
+          {offered.map((o) => (
+            <Button key={o} variant={include.includes(o) ? "default" : "outline"} onClick={() => toggleProduct(o)}>
+              {o === "wakeShake" ? "פסקת ווייק-שייק" : "פסקת מיי-שיא"}
+            </Button>
+          ))}
+        </Actions>
+      )}
 
       {notice?.kind === "concern" && <ConcernWarning reasons={notice.reasons} />}
       {notice?.kind === "info" && <Note>{notice.text}</Note>}
@@ -210,7 +233,7 @@ function SummaryBody({
             onChange={(e) => setDraft(e.target.value)}
           />
           {draft && hasPlaceholders(draft) && (
-            <Note>יש בטיוטה שדות שעוד לא מולאו, כמו {"{קוד}"} או {"{תאריך}"}. השלימו אותם לפני השליחה.</Note>
+            <Note>יש בטיוטה שדות שעוד לא מולאו (בסוגריים מסולסלים). השלימו אותם לפני השליחה.</Note>
           )}
 
           {forbidden.length > 0 && (

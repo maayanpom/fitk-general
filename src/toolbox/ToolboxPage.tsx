@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
+import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
 import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { CommunityInvite } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
@@ -14,7 +18,8 @@ import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import { MAX_TOOLS, MIN_TOOLS, TOOLS_LIMIT_EVENT, useSavedTools } from "./useSavedTools"
 import { ToolCard } from "./ToolCard"
 import { ToolDialog } from "./ToolDialog"
-import { TOOLS, type Tool } from "./tools"
+import { TOOLS, TOOLS_BY_ID, type Tool } from "./tools"
+import { computeTiers, type ProductId, type ScoredTool } from "./matching"
 
 // Wider than the day pages, so the tool board fits in fewer rows on tablets and desktops.
 const PageInner = styled(BasePageInner)`
@@ -88,12 +93,14 @@ const Transparency = styled.p`
 `
 
 export default function ToolboxPage() {
-  const { participant, syncState } = useParticipant()
+  const { participant, syncState, updateSection } = useParticipant()
   const coach = useCoachPublicInfo(participant.coachSlug)
   const { selected } = useSavedTools()
   const { isCompleted, complete, resultRef } = useCompletion("toolbox")
   const [openTool, setOpenTool] = useState<Tool | null>(null)
   const [limitHit, setLimitHit] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     const onLimit = () => setLimitHit(true)
@@ -106,6 +113,21 @@ export default function ToolboxPage() {
 
   const savedTools = TOOLS.filter((t) => selected.includes(t.id))
   const countOk = selected.length >= MIN_TOOLS && selected.length <= MAX_TOOLS
+  const tiers = useMemo(() => computeTiers(participant), [participant])
+  const toolOf = (id: string) => TOOLS_BY_ID[id]
+  const renderCard = (t: ScoredTool, because = false) => (
+    <ToolCard
+      key={t.id}
+      tool={toolOf(t.id)}
+      onOpen={setOpenTool}
+      framed={tiers.framedProducts.includes(t.id as ProductId)}
+      because={because ? t.because : undefined}
+    />
+  )
+
+  const anchor = participant.toolbox.anchorTool
+  const anchorValid = anchor === "unsure" || selected.includes(anchor)
+  const showAnchor = (saved || Boolean(anchor)) && countOk
 
   return (
     <PageShell>
@@ -113,33 +135,58 @@ export default function ToolboxPage() {
         <div>
           <HeroImage image={toolboxImage} badge="🧰" title="אין זמן? יש פתרון." />
           <HeroText>
-            בשלושת הימים האחרונים גילינו איפה השגרה שלך פחות פשוטה. עכשיו הגיע הזמן לבחור כמה כלים
-            שיכולים לעזור לך בדיוק ברגעים האלה.
+            לפי מה ששיתפתם בשלושת הימים, ליקטתי לכם את הכלים שהכי קרובים למה שסיפרתם.
           </HeroText>
           <HeroText>
-            לא צריך לבחור הכל. בחר/י 2 עד 4 כלים שאת/ה באמת יכול/ה לראות את עצמך משתמש/ת בהם
-            בשבוע הקרוב.
+            לא צריך הכול. בחרו 2 עד 4 כלים שאתם באמת רואים את עצמכם משתמשים בהם בשבוע הקרוב.
           </HeroText>
         </div>
 
+        {tiers.closest.length > 0 && (
+          <Section>
+            <SectionTitle>⭐ הכי קרוב למה ששיתפתם</SectionTitle>
+            <CardList>{tiers.closest.map((t) => renderCard(t, true))}</CardList>
+          </Section>
+        )}
+
+        {tiers.maybe.length > 0 && (
+          <Section>
+            <SectionTitle>💡 יכולים גם להתאים</SectionTitle>
+            <CardList>{tiers.maybe.map((t) => renderCard(t))}</CardList>
+          </Section>
+        )}
+
         <Section>
-          <CardList>
-            {TOOLS.map((tool) => (
-              <ToolCard key={tool.id} tool={tool} onOpen={setOpenTool} />
-            ))}
-          </CardList>
-          <Transparency>ווייק-שייק ומיי-שיא הם מוצרי HoldOn שאני משווקת.</Transparency>
+          <SectionTitle>עוד רעיונות</SectionTitle>
+          {showMore ? (
+            <CardList>{tiers.more.map((t) => renderCard(t))}</CardList>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => setShowMore(true)}>
+              להציג עוד רעיונות
+            </Button>
+          )}
+          {!tiers.hideProducts && (
+            <Transparency>
+              ווייק-שייק ומיי-שיא הם מוצרים של HoldOn, שאני משווקת. אני מציגה אותם רק כשהם
+              מתאימים למה ששיתפתם.
+            </Transparency>
+          )}
         </Section>
 
         <MyTools>
           <SectionTitle>⭐ הכלים שבחרתי לעצמי</SectionTitle>
-          <Subtle>בחר/י 2-4 כלים שאת/ה באמת רוצה לנסות בשבוע הקרוב.</Subtle>
+          <Subtle>בחרו 2-4 כלים שאתם באמת רוצים לנסות בשבוע הקרוב.</Subtle>
           {savedTools.length === 0 ? (
             <Subtle>עוד לא נבחרו כלים.</Subtle>
           ) : (
             <CardList>
               {savedTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} onOpen={setOpenTool} />
+                <ToolCard
+                  key={tool.id}
+                  tool={tool}
+                  onOpen={setOpenTool}
+                  framed={tiers.framedProducts.includes(tool.id as ProductId)}
+                />
               ))}
             </CardList>
           )}
@@ -147,17 +194,53 @@ export default function ToolboxPage() {
         </MyTools>
 
         <Note>
-          אלה לא דברים שצריך לעשות מושלם. המטרה היא למצוא כמה פתרונות קטנים שעובדים בשבילך בחיים
+          אלה לא דברים שצריך לעשות מושלם. המטרה היא למצוא כמה פתרונות קטנים שעובדים בשבילכם בחיים
           האמיתיים ❤️
         </Note>
 
-        <DoneButton disabled={!countOk} onClick={() => void complete()}>
-          שמירה לעצמי
-        </DoneButton>
-        {!countOk && (
-          <DoneHint>
-            {selected.length < MIN_TOOLS ? "בחר/י לפחות 2 כלים כדי לשמור" : "אפשר לשמור עד 4 כלים"}
-          </DoneHint>
+        {!showAnchor && (
+          <>
+            <DoneButton disabled={!countOk} onClick={() => setSaved(true)}>
+              שמירה לעצמי
+            </DoneButton>
+            {!countOk && (
+              <DoneHint>
+                {selected.length < MIN_TOOLS ? "בחרו לפחות 2 כלים כדי לשמור" : "אפשר לשמור עד 4 כלים"}
+              </DoneHint>
+            )}
+          </>
+        )}
+
+        {showAnchor && (
+          <MyTools>
+            <SectionTitle>
+              מתוך הכלים שבחרתם, איזה מהם הכי הייתם רוצים שבאמת יעבוד לכם השבוע?
+            </SectionTitle>
+            <ChoiceGroup
+              value={anchorValid ? anchor : ""}
+              onValueChange={(v) => updateSection("toolbox", { anchorTool: v })}
+              aria-label="הכלי שהכי הייתם רוצים שיעבוד לכם השבוע"
+            >
+              {savedTools.map((t) => (
+                <ChoicePill key={t.id} value={t.id}>
+                  {`${t.emoji} ${t.name}`}
+                </ChoicePill>
+              ))}
+              <ChoicePill value="unsure">עוד לא יודעים</ChoicePill>
+            </ChoiceGroup>
+            <Label htmlFor="anchor-note">מה הכי יעזור לכם שזה יקרה?</Label>
+            <Input
+              id="anchor-note"
+              maxLength={100}
+              placeholder="רשות"
+              value={participant.toolbox.anchorNote}
+              onChange={(e) => updateSection("toolbox", { anchorNote: e.target.value })}
+            />
+            <DoneButton disabled={!anchorValid || !anchor} onClick={() => void complete()}>
+              סיימתי ✓
+            </DoneButton>
+            {(!anchorValid || !anchor) && <DoneHint>בחרו כלי אחד, או "עוד לא יודעים"</DoneHint>}
+          </MyTools>
         )}
 
         <ResultArea ref={resultRef}>
@@ -167,12 +250,12 @@ export default function ToolboxPage() {
               <Finale>
                 <h2>מעולה ❤️</h2>
                 <p>
-                  עכשיו יש לנו את שלושת החלקים של התמונה: איך היום שלך נראה, איך נראית ארוחה אחת,
-                  ואיפה הכי קשה לך ומה יכול להקל.
+                  עכשיו יש לנו את שלושת החלקים של התמונה: איך היום שלכם נראה, איך נראית ארוחה אחת,
+                  ואיפה הכי קשה לכם ומה יכול להקל.
                 </p>
-                <p>אני אעבור על מה ששיתפת ואחזור אליך עם סיכום אישי וכלים שמתאימים לך.</p>
+                <p>אני אעבור על מה ששיתפתם ואחזור אליכם עם סיכום אישי.</p>
                 <p>
-                  התשובות שלך נשארות אצלי, ומשמשות רק לסיכום האישי שלך ולהצעה להמשך, אם תרצה.
+                  התשובות נשארות אצלי, ומשמשות רק לסיכום האישי ולהצעה להמשך, אם תרצו.
                 </p>
               </Finale>
               <CommunityInvite communityUrl={coach?.communityUrl} />
