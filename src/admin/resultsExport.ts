@@ -1,7 +1,8 @@
 import type { Participant } from "@/data/participant"
 import { HARDEST_OPTIONS, MEALS } from "@/days/day1/types"
 import { MEAL_OPTIONS } from "@/days/day2/content"
-import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
+import { describeChoices, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
+import { TOOLS_BY_ID } from "@/toolbox/tools"
 import { formatDateTime, SOURCE_LABELS, type Registration } from "./adminData"
 
 export type ResultColumn = {
@@ -48,17 +49,34 @@ export const RESULT_COLUMNS: ResultColumn[] = [
   { header: "יום 3 הושלם", value: (_, p) => done(p?.day3.completedAt) },
   {
     header: "יום 3 – הרגע הקשה",
-    value: (_, p) => MOMENT_OPTIONS.find((o) => o.value === p?.day3.momentChoice)?.label ?? "",
+    value: (_, p) =>
+      p ? describeChoices(MOMENT_OPTIONS, [p.day3.momentChoice], p.day3.momentOther) : "",
   },
   {
     header: "יום 3 – בדרך כלל קורה",
-    value: (_, p) => HAPPENS_OPTIONS.find((o) => o.value === p?.day3.happensChoice)?.label ?? "",
+    value: (_, p) =>
+      p ? describeChoices(HAPPENS_OPTIONS, p.day3.happensChoices, p.day3.happensOther) : "",
   },
   {
     header: "יום 3 – מה היה עוזר",
-    value: (_, p) => HELP_OPTIONS.find((o) => o.value === p?.day3.helpChoice)?.label ?? "",
+    value: (_, p) => (p ? describeChoices(HELP_OPTIONS, p.day3.helpChoices, p.day3.helpOther) : ""),
   },
+  { header: "יום 3 – הדבר האחד", value: (_, p) => p?.day3.oneThing.trim() ?? "" },
   { header: "יום 3 – הערה", value: (_, p) => p?.day3.extraNote.trim() ?? "" },
+  {
+    header: "כלים שנבחרו",
+    value: (_, p) =>
+      (p?.toolbox.selectedTools ?? [])
+        .map((id) => TOOLS_BY_ID[id]?.name)
+        .filter(Boolean)
+        .join("; "),
+  },
+  // Coach-only: for the personal conversation, never shown to the participant.
+  {
+    header: "בחרה מוצר",
+    value: (_, p) =>
+      (p?.toolbox.selectedTools ?? []).some((id) => TOOLS_BY_ID[id]?.isProduct) ? "כן" : "לא",
+  },
   { header: "הערות המאמן/ת", value: (r) => r.coachNotes },
 ]
 

@@ -9,8 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { whatsAppLinkForPhone } from "@/config"
 import type { Coach } from "@/data/coach"
@@ -26,20 +24,6 @@ const Stack = styled.div`
   display: flex;
   flex-direction: column;
   gap: 14px;
-`
-
-const Row = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-
-  > div {
-    flex: 1;
-    min-width: 160px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
 `
 
 const Warning = styled.div`
@@ -84,9 +68,9 @@ function ConcernWarning({ reasons }: { reasons: string[] }) {
     <Warning role="alert">
       <h3>
         <TriangleAlert size={20} />
-        לא נוצרה טיוטה אוטומטית
+        לבדיקה ידנית: לא נוצרה טיוטה אוטומטית
       </h3>
-      <span>בתשובות יש סימנים שמחייבים מענה אישי:</span>
+      <span>בתשובות יש סימנים שמחייבים בדיקה ומענה אישי:</span>
       <ul>
         {reasons.map((r) => (
           <li key={r}>{r}</li>
@@ -153,8 +137,6 @@ function SummaryBody({
 }) {
   const [draft, setDraft] = useState(summary?.draft ?? "")
   const [sentAt, setSentAt] = useState(summary?.sentAt ?? null)
-  const [couponCode, setCouponCode] = useState("")
-  const [couponExpiresAt, setCouponExpiresAt] = useState("")
   const [notice, setNotice] = useState<{ kind: "concern"; reasons: string[] } | { kind: "info"; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
@@ -163,11 +145,8 @@ function SummaryBody({
   const generate = () => {
     const result = generateSummary(participant, {
       longGapHours: coach.longGapHours,
-      couponText: coach.couponText,
-      couponCode,
-      couponExpiresAt,
       communityUrl: coach.communityUrl,
-      toolboxLink: `${window.location.origin}/start/${participant.participantId}/toolbox`,
+      toolboxLink: `${window.location.origin}/${coach.slug}/toolbox`,
     })
 
     if (result.kind === "concern") {
@@ -215,27 +194,6 @@ function SummaryBody({
 
   return (
     <Stack>
-      <Row>
-        <div>
-          <Label htmlFor="coupon-code">קוד קופון האתגר</Label>
-          <Input
-            id="coupon-code"
-            dir="ltr"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="coupon-expires">בתוקף עד</Label>
-          <Input
-            id="coupon-expires"
-            placeholder="למשל 31.10.2026"
-            value={couponExpiresAt}
-            onChange={(e) => setCouponExpiresAt(e.target.value)}
-          />
-        </div>
-      </Row>
-
       <Actions>
         <Button onClick={generate}>{draft ? "יצירת טיוטה מחדש" : "יצירת טיוטה"}</Button>
       </Actions>

@@ -1,30 +1,41 @@
 import type { Day3HappensChoice, Day3HelpChoice, Day3MomentChoice } from "@/data/participant"
 
 export const MOMENT_OPTIONS: { value: Exclude<Day3MomentChoice, "">; label: string }[] = [
-  { value: "morning", label: "בבוקר כשממהרים" },
-  { value: "lunchWork", label: "בצהריים בעבודה או בדרכים" },
-  { value: "afternoon", label: "אחר הצהריים כשהאנרגיה יורדת" },
+  { value: "morning", label: "בבוקר כשאני ממהר/ת" },
+  { value: "lunchWork", label: "בצהריים בעבודה / בדרכים" },
+  { value: "afternoon", label: "אחר הצהריים" },
   { value: "evening", label: "בערב אחרי יום ארוך" },
-  { value: "weekend", label: "בסופי שבוע ובאירועים" },
-  { value: "other", label: "אחר" },
+  { value: "weekend", label: "בסופי שבוע / יציאות" },
+  { value: "other", label: "משהו אחר" },
 ]
 
-export const HAPPENS_OPTIONS: { value: Exclude<Day3HappensChoice, "">; label: string }[] = [
-  { value: "skip", label: "דילוג על ארוחה" },
-  { value: "grabWhatever", label: "נשנוש ממה שנמצא" },
-  { value: "quickStanding", label: "אכילה מהירה בעמידה" },
-  { value: "screen", label: "אכילה מול מסך" },
-  { value: "orderIn", label: "הזמנת אוכל מוכן" },
-  { value: "largeAmount", label: "אכילה בכמויות גדולות" },
-  { value: "other", label: "אחר" },
+export const HAPPENS_OPTIONS: { value: Day3HappensChoice; label: string }[] = [
+  { value: "skip", label: "אני מדלג/ת על ארוחה" },
+  { value: "eatAvailable", label: "אוכל/ת את מה שזמין" },
+  { value: "veryHungry", label: "מגיע/ה רעב/ה מאוד" },
+  { value: "eatFast", label: "אוכל/ת מהר או תוך כדי משהו אחר" },
+  { value: "orderIn", label: "מזמין/ה אוכל כי אין לי פתרון זמין" },
+  { value: "other", label: "משהו אחר" },
 ]
 
-export const HELP_OPTIONS: { value: Exclude<Day3HelpChoice, "">; label: string }[] = [
+export const HELP_OPTIONS: { value: Day3HelpChoice; label: string }[] = [
   { value: "readyMade", label: "משהו מוכן מראש" },
-  { value: "reminder", label: "תזכורת לעצור" },
-  { value: "protein", label: "חלבון זמין" },
-  { value: "drink", label: "שתייה" },
-  { value: "planAhead", label: "תכנון מראש של היום" },
-  { value: "smallHelp", label: "עזרה קטנה בבית או בזמן" },
-  { value: "other", label: "אחר" },
+  { value: "quickMeal", label: "ארוחה מהירה וזמינה" },
+  { value: "proteinAvailable", label: "שיהיה לי מקור חלבון זמין" },
+  { value: "takeAlong", label: "משהו שאפשר לקחת איתי" },
+  { value: "shortPlan", label: "תכנון קצר מראש" },
+  { value: "noTimeSolution", label: "פתרון שיעזור לי כשאין לי זמן" },
+  { value: "other", label: "משהו אחר" },
 ]
+
+// "label; label; משהו אחר: text" - the shape used in the coach's Excel export and details.
+export function describeChoices(
+  options: { value: string; label: string }[],
+  values: string[],
+  other: string,
+): string {
+  return options
+    .filter((o) => values.includes(o.value))
+    .map((o) => (o.value === "other" && other.trim() ? `${o.label}: ${other.trim()}` : o.label))
+    .join("; ")
+}

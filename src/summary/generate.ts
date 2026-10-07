@@ -2,7 +2,7 @@ import type { Participant } from "@/data/participant"
 import { getLongestGap } from "@/days/day1/feedback"
 import { joinHebrew, missingComponents, PLATE_LABELS, PLATE_TIPS } from "@/days/day2/feedback"
 import { HARDEST_OPTIONS } from "@/days/day1/types"
-import { MOMENT_OPTIONS } from "@/days/day3/content"
+import { describeChoices, MOMENT_OPTIONS } from "@/days/day3/content"
 
 // Rule-based (no AI) draft of the personal summary a coach sends after day 3.
 // The output is structured data; renderWhatsappText (render.ts) turns it into
@@ -14,10 +14,6 @@ export type SummaryData = {
   findings: [string, string, string]
   hard_moment: string
   experiments: [string, string, string]
-  gifts: {
-    registration_gift_text: string
-    challenge_coupon: { text: string; code: string; expires_at: string }
-  }
   links: { toolbox: string; community: string }
 }
 
@@ -28,17 +24,9 @@ export type SummaryResult =
 
 export type SummaryOptions = {
   longGapHours: number
-  couponText: string | null
-  couponCode: string
-  couponExpiresAt: string
   communityUrl: string | null
   toolboxLink: string
 }
-
-export const REGISTRATION_GIFT_TEXT =
-  "מתנת הרשמה של 50 שקלים, יורדת אוטומטית בקופה, בתוקף 30 יום מההרשמה"
-
-export const DEFAULT_COUPON_TEXT = "קופון האתגר, 50 שקלים"
 
 // ---- Concerning answers ---------------------------------------------------
 // The content doc's list of signs. Only the free-text fields (what was eaten,
@@ -46,6 +34,7 @@ export const DEFAULT_COUPON_TEXT = "קופון האתגר, 50 שקלים"
 // structural sign: a day with no eating points at all combined with "skipping".
 const CONCERN_KEYWORDS: { pattern: RegExp; reason: string }[] = [
   { pattern: /הקא|להקיא|הקיא/, reason: "אזכור של הקאות" },
+  { pattern: /צום/, reason: "אזכור של צום" },
   { pattern: /התקפ|בולמוס|בולימי|אנורק/, reason: "אזכור של אכילה בהתקפים או של הפרעת אכילה" },
   { pattern: /פחד מאוכל|מפחד[תה]? לאכול|מפחדת מאוכל/, reason: "פחד מאוכל" },
   { pattern: /אשמה|מתעב|שונא[תה]? את עצמ|מגעיל/, reason: "אשמה או כעס קיצוניים על אוכל" },
@@ -59,7 +48,16 @@ export function detectConcerns(p: Participant): string[] {
   const reasons = new Set<string>()
   const day1 = p.day1
   const points = [day1.breakfast, day1.morningSnack, day1.lunch, day1.afternoon, day1.dinner, ...day1.additionalSnacks]
-  const texts = [...points.map((x) => x.food), p.day3.extraNote, p.toolbox.fiveMinuteMeal, p.toolbox.bagSnack]
+  const texts = [
+    ...points.map((x) => x.food),
+    p.day3.extraNote,
+    p.day3.oneThing,
+    p.day3.momentOther,
+    p.day3.happensOther,
+    p.day3.helpOther,
+    p.toolbox.fiveMinuteMeal,
+    p.toolbox.bagSnack,
+  ]
 
   for (const text of texts) {
     for (const { pattern, reason } of CONCERN_KEYWORDS) {
@@ -68,8 +66,17 @@ export function detectConcerns(p: Participant): string[] {
   }
 
   const noPoints = points.every((x) => !x.time && !x.food.trim())
-  if (day1.completedAt && noPoints && p.day3.happensChoice === "skip") {
+  if (day1.completedAt && noPoints && p.day3.happensChoices.includes("skip")) {
     reasons.add("יום ללא נקודות אכילה, יחד עם דילוג על אוכל")
+  }
+  // Manual-review rules: skipping a meal together with arriving very hungry,
+  // or fewer than three filled eating points on day 1.
+  if (p.day3.happensChoices.includes("skip") && p.day3.happensChoices.includes("veryHungry")) {
+    reasons.add("דילוג על ארוחה יחד עם הגעה רעבה מאוד")
+  }
+  const filled = points.filter((x) => x.time || x.food.trim()).length
+  if (day1.completedAt && filled < 3) {
+    reasons.add("ביום 1 מולאו פחות משלוש נקודות אכילה")
   }
   return [...reasons]
 }
@@ -143,11 +150,11 @@ const MOMENT_EXPERIMENTS: Record<string, string> = {
 // Second suggestion: by what the participant said would help (question 3).
 const HELP_EXPERIMENTS: Record<string, string> = {
   readyMade: "להכין מראש דבר אחד קטן שיחכה ברגע הקשה",
-  reminder: "לקבוע תזכורת לשעה הקשה ולעצור שתי דקות לפני שמחליטים",
-  protein: "להשאיר בהישג יד מקור חלבון פשוט, כמו ביצה קשה, גבינה או יוגורט",
-  drink: "להכין כוס או בקבוק מים לפני הרגע הקשה",
-  planAhead: "בבוקר לכתוב שלוש נקודות אכילה לפי הזמן שיש",
-  smallHelp: "לבקש עזרה אחת קטנה שתפנה חמש דקות באותה שעה",
+  quickMeal: "להחזיק בבית ארוחה מהירה שאפשר להרכיב תוך דקות",
+  proteinAvailable: "להשאיר בהישג יד מקור חלבון פשוט, כמו ביצה קשה, גבינה או יוגורט",
+  takeAlong: "להכין משהו קטן שאפשר לקחת איתי מהבית",
+  shortPlan: "בבוקר לכתוב שלוש נקודות אכילה לפי הזמן שיש",
+  noTimeSolution: "לבחור פתרון אחד לימים בלי זמן, ולהחזיק אותו זמין",
   other: "לבחור צעד קטן אחד ולנסות שלוש פעמים השבוע",
 }
 
@@ -164,14 +171,14 @@ function pickExperiments(p: Participant): [string, string, string] {
     if (text && !picked.includes(text)) picked.push(text)
   }
   add(MOMENT_EXPERIMENTS[p.day3.momentChoice] ?? MOMENT_EXPERIMENTS.other)
-  add(HELP_EXPERIMENTS[p.day3.helpChoice])
+  for (const choice of p.day3.helpChoices) add(HELP_EXPERIMENTS[choice])
   for (const filler of FILLER_EXPERIMENTS) add(filler)
   return [picked[0], picked[1], picked[2]]
 }
 
 // ---- Main -----------------------------------------------------------------
 function hardMoment(p: Participant): string {
-  const fromDay3 = MOMENT_OPTIONS.find((o) => o.value === p.day3.momentChoice)?.label
+  const fromDay3 = describeChoices(MOMENT_OPTIONS, [p.day3.momentChoice], p.day3.momentOther)
   if (fromDay3) return fromDay3
   const fromDay1 = HARDEST_OPTIONS.find((o) => o.value === p.day1.hardestMoment)
   return fromDay1 && fromDay1.value !== "none" ? fromDay1.label : ""
@@ -195,14 +202,6 @@ export function generateSummary(p: Participant, opts: SummaryOptions): SummaryRe
       findings: [findings[0].text, findings[1].text, findings[2].text],
       hard_moment: hardMoment(p),
       experiments: pickExperiments(p),
-      gifts: {
-        registration_gift_text: REGISTRATION_GIFT_TEXT,
-        challenge_coupon: {
-          text: opts.couponText?.trim() || DEFAULT_COUPON_TEXT,
-          code: opts.couponCode.trim(),
-          expires_at: opts.couponExpiresAt.trim(),
-        },
-      },
       links: { toolbox: opts.toolboxLink, community: opts.communityUrl?.trim() ?? "" },
     },
   }

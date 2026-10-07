@@ -11,7 +11,7 @@ import type { Participant } from "@/data/participant"
 import { HARDEST_OPTIONS, MEALS } from "@/days/day1/types"
 import { MEAL_OPTIONS } from "@/days/day2/content"
 import { getDay2Feedback } from "@/days/day2/feedback"
-import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
+import { describeChoices, HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "@/days/day3/content"
 import { TOOLS_BY_ID } from "@/toolbox/tools"
 import { formatDateTime } from "./adminData"
 
@@ -145,24 +145,17 @@ export function ParticipantDetails({
             <dl>
               <Row
                 label="הרגע הקשה"
-                value={
-                  MOMENT_OPTIONS.find((o) => o.value === participant.day3.momentChoice)?.label ??
-                  "—"
-                }
+                value={describeChoices(MOMENT_OPTIONS, [participant.day3.momentChoice], participant.day3.momentOther) || "—"}
               />
               <Row
                 label="בדרך כלל קורה"
-                value={
-                  HAPPENS_OPTIONS.find((o) => o.value === participant.day3.happensChoice)?.label ??
-                  "—"
-                }
+                value={describeChoices(HAPPENS_OPTIONS, participant.day3.happensChoices, participant.day3.happensOther) || "—"}
               />
               <Row
                 label="מה היה עוזר"
-                value={
-                  HELP_OPTIONS.find((o) => o.value === participant.day3.helpChoice)?.label ?? "—"
-                }
+                value={describeChoices(HELP_OPTIONS, participant.day3.helpChoices, participant.day3.helpOther) || "—"}
               />
+              <Row label="הדבר האחד" value={orDash(participant.day3.oneThing)} />
               <Row label="הוסיפו" value={orDash(participant.day3.extraNote)} />
             </dl>
           </Section>

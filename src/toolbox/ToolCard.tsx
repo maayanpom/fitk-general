@@ -84,7 +84,7 @@ type Props = {
 export function ToolCard({ tool, onOpen }: Props) {
   return (
     <Card>
-      <Open type="button" onClick={() => onOpen(tool)}>
+      <Open type="button" onClick={() => !tool.isProduct && onOpen(tool)}>
         <Icon aria-hidden>{tool.emoji}</Icon>
         <Text>
           <strong>{tool.name}</strong>
@@ -93,9 +93,11 @@ export function ToolCard({ tool, onOpen }: Props) {
       </Open>
       <Actions>
         <SaveToolButton toolId={tool.id} />
-        <More type="button" onClick={() => onOpen(tool)}>
-          לכל הפרטים
-        </More>
+        {!tool.isProduct && (
+          <More type="button" onClick={() => onOpen(tool)}>
+            לכל הפרטים
+          </More>
+        )}
       </Actions>
     </Card>
   )

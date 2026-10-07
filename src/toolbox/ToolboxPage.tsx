@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
-import { DoneButton } from "@/components/challenge/DoneButton"
-import { CommunityInvite, PersonalFeedbackButton } from "@/components/challenge/links"
+import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
+import { CommunityInvite } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
@@ -11,11 +11,10 @@ import { HeroImage } from "@/components/challenge/HeroImage"
 import { PageInner as BasePageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
-import { useSavedTools } from "./useSavedTools"
-import { SITUATIONS } from "./situations"
+import { MAX_TOOLS, MIN_TOOLS, TOOLS_LIMIT_EVENT, useSavedTools } from "./useSavedTools"
 import { ToolCard } from "./ToolCard"
 import { ToolDialog } from "./ToolDialog"
-import { TOOLS, TOOLS_BY_ID, type Tool } from "./tools"
+import { TOOLS, type Tool } from "./tools"
 
 // Wider than the day pages, so the tool board fits in fewer rows on tablets and desktops.
 const PageInner = styled(BasePageInner)`
@@ -38,93 +37,10 @@ const Section = styled.section`
   gap: 14px;
 `
 
-const SituationGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-`
-
-const SituationButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 96px;
-  padding: 12px;
-  border-radius: calc(var(--radius) * 1.4);
-  border: 2px solid ${({ $active }) => ($active ? "var(--primary)" : "var(--border)")};
-  background: ${({ $active }) => ($active ? "var(--accent)" : "var(--card)")};
-  color: var(--foreground);
-  font: inherit;
-  font-weight: 600;
-  line-height: 1.35;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-
-  span {
-    font-size: 1.8rem;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-`
-
 const CardList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-`
-
-const Board = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-`
-
-const BoardTile = styled.button<{ $saved: boolean }>`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 6px 10px;
-  min-height: 96px;
-  justify-content: center;
-  border-radius: 18px;
-  border: 1.5px solid ${({ $saved }) => ($saved ? "var(--primary)" : "transparent")};
-  background: var(--card);
-  box-shadow: 0 4px 14px -10px oklch(0.3 0.06 300 / 0.35);
-  color: var(--foreground);
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-align: center;
-  cursor: pointer;
-
-  .emoji {
-    font-size: 1.8rem;
-  }
-
-  .star {
-    position: absolute;
-    top: 6px;
-    inset-inline-end: 8px;
-    font-size: 0.8rem;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
 `
 
 const MyTools = styled(Section)`
@@ -155,16 +71,41 @@ const Finale = styled.section`
   }
 `
 
+const Note = styled.p`
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+`
+
+const Transparency = styled.p`
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+`
+
 export default function ToolboxPage() {
   const { participant, syncState } = useParticipant()
   const coach = useCoachPublicInfo(participant.coachSlug)
   const { selected } = useSavedTools()
   const { isCompleted, complete, resultRef } = useCompletion("toolbox")
-  const [situationId, setSituationId] = useState<string | null>(null)
   const [openTool, setOpenTool] = useState<Tool | null>(null)
+  const [limitHit, setLimitHit] = useState(false)
 
-  const situation = SITUATIONS.find((s) => s.id === situationId)
+  useEffect(() => {
+    const onLimit = () => setLimitHit(true)
+    window.addEventListener(TOOLS_LIMIT_EVENT, onLimit)
+    return () => window.removeEventListener(TOOLS_LIMIT_EVENT, onLimit)
+  }, [])
+  useEffect(() => {
+    if (selected.length < MAX_TOOLS) setLimitHit(false)
+  }, [selected.length])
+
   const savedTools = TOOLS.filter((t) => selected.includes(t.id))
+  const countOk = selected.length >= MIN_TOOLS && selected.length <= MAX_TOOLS
 
   return (
     <PageShell>
@@ -172,72 +113,29 @@ export default function ToolboxPage() {
         <div>
           <HeroImage image={toolboxImage} badge="🧰" title="אין זמן? יש פתרון." />
           <HeroText>
-            לא צריך יום מושלם. צריך כמה פתרונות זמינים שאפשר לשלוף ברגע האמת.
+            בשלושת הימים האחרונים גילינו איפה השגרה שלך פחות פשוטה. עכשיו הגיע הזמן לבחור כמה כלים
+            שיכולים לעזור לך בדיוק ברגעים האלה.
+          </HeroText>
+          <HeroText>
+            לא צריך לבחור הכל. בחר/י 2 עד 4 כלים שאת/ה באמת יכול/ה לראות את עצמך משתמש/ת בהם
+            בשבוע הקרוב.
           </HeroText>
         </div>
 
         <Section>
-          <SectionTitle>איזה יום עמוס יש לך?</SectionTitle>
-          <SituationGrid>
-            {SITUATIONS.map((s) => (
-              <SituationButton
-                key={s.id}
-                type="button"
-                aria-pressed={s.id === situationId}
-                $active={s.id === situationId}
-                onClick={() => setSituationId(s.id === situationId ? null : s.id)}
-              >
-                <span aria-hidden>{s.emoji}</span>
-                {s.label}
-              </SituationButton>
+          <CardList>
+            {TOOLS.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} onOpen={setOpenTool} />
             ))}
-          </SituationGrid>
-          {situation && (
-            <CardList>
-              <Subtle>הכלים שיכולים לעזור לך ביום כזה:</Subtle>
-              {situation.toolIds.map((id) => (
-                <ToolCard key={id} tool={TOOLS_BY_ID[id]} onOpen={setOpenTool} />
-              ))}
-            </CardList>
-          )}
-        </Section>
-
-        <Section>
-          <div>
-            <SectionTitle>לוח הכלים</SectionTitle>
-            <Subtle>כל הכלים במקום אחד. לחיצה על כלי פותחת את ההסבר.</Subtle>
-          </div>
-          <Board>
-            {TOOLS.map((tool) => {
-              const saved = selected.includes(tool.id)
-              return (
-                <BoardTile
-                  key={tool.id}
-                  type="button"
-                  $saved={saved}
-                  onClick={() => setOpenTool(tool)}
-                >
-                  {saved && (
-                    <span className="star" aria-label="נשמר">
-                      ⭐
-                    </span>
-                  )}
-                  <span className="emoji" aria-hidden>
-                    {tool.emoji}
-                  </span>
-                  {tool.name}
-                </BoardTile>
-              )
-            })}
-          </Board>
+          </CardList>
+          <Transparency>ווייק-שייק ומיי-שיא הם מוצרי HoldOn שאני משווקת.</Transparency>
         </Section>
 
         <MyTools>
           <SectionTitle>⭐ הכלים שבחרתי לעצמי</SectionTitle>
+          <Subtle>בחר/י 2-4 כלים שאת/ה באמת רוצה לנסות בשבוע הקרוב.</Subtle>
           {savedTools.length === 0 ? (
-            <Subtle>
-              עוד לא בחרתם כלים. לחצו על "שמירה לעצמי" בכלים שמתאימים לחיים שלכם, מספיקים 2 עד 4.
-            </Subtle>
+            <Subtle>עוד לא נבחרו כלים.</Subtle>
           ) : (
             <CardList>
               {savedTools.map((tool) => (
@@ -245,21 +143,37 @@ export default function ToolboxPage() {
               ))}
             </CardList>
           )}
+          {limitHit && <Note>אפשר לבחור עד 4 כלים. כדי לבחור כלי אחר, אפשר להסיר אחד קודם.</Note>}
         </MyTools>
 
-        <DoneButton onClick={() => void complete()}>סיימתי לבחור ✓</DoneButton>
+        <Note>
+          אלה לא דברים שצריך לעשות מושלם. המטרה היא למצוא כמה פתרונות קטנים שעובדים בשבילך בחיים
+          האמיתיים ❤️
+        </Note>
+
+        <DoneButton disabled={!countOk} onClick={() => void complete()}>
+          שמירה לעצמי
+        </DoneButton>
+        {!countOk && (
+          <DoneHint>
+            {selected.length < MIN_TOOLS ? "בחר/י לפחות 2 כלים כדי לשמור" : "אפשר לשמור עד 4 כלים"}
+          </DoneHint>
+        )}
 
         <ResultArea ref={resultRef}>
           {isCompleted && syncState === "error" && <CompletionMessage />}
           {isCompleted && syncState !== "error" && (
             <>
               <Finale>
-                <h2>🎉 כל הכבוד, סיימתם!</h2>
+                <h2>מעולה ❤️</h2>
                 <p>
-                  <strong>כל התשובות שמילאתם במהלך האתגר נשלחו אליי.</strong>
+                  עכשיו יש לנו את שלושת החלקים של התמונה: איך היום שלך נראה, איך נראית ארוחה אחת,
+                  ואיפה הכי קשה לך ומה יכול להקל.
                 </p>
-                <p>אם תרצו לקבל ממני פידבק אישי על מה שכתבתם – מוזמנים לפנות אליי בפרטי.</p>
-                <PersonalFeedbackButton firstName={participant.firstName} phone={coach?.phone} />
+                <p>אני אעבור על מה ששיתפת ואחזור אליך עם סיכום אישי וכלים שמתאימים לך.</p>
+                <p>
+                  התשובות שלך נשארות אצלי, ומשמשות רק לסיכום האישי שלך ולהצעה להמשך, אם תרצה.
+                </p>
               </Finale>
               <CommunityInvite communityUrl={coach?.communityUrl} />
             </>

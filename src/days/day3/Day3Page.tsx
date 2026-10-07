@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { CompletionMessage } from "@/components/challenge/CompletionMessage"
-import { ChoiceGroup, ChoicePill } from "@/components/challenge/ChoicePill"
+import { ChoiceGroup, ChoicePill, MultiChoiceGroup, MultiChoicePill } from "@/components/challenge/ChoicePill"
 import { CompletionProgress } from "@/components/challenge/CompletionProgress"
 import { DayHeader } from "@/components/challenge/DayHeader"
 import { DoneButton, DoneHint } from "@/components/challenge/DoneButton"
@@ -8,7 +8,6 @@ import { CommunityInvite, QuestionButton } from "@/components/challenge/links"
 import { PageFooter } from "@/components/challenge/PageFooter"
 import { ResultArea } from "@/components/challenge/ResultArea"
 import { useCompletion } from "@/components/challenge/useCompletion"
-import { WhyItMatters } from "@/components/challenge/WhyItMatters"
 import { PageInner, PageShell, SectionTitle, Subtle } from "@/components/layout/PageShell"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,8 +16,6 @@ import { useParticipant } from "@/data/participantContext"
 import { useCoachPublicInfo } from "@/data/useCoachPublicInfo"
 import day3Image from "@/assets/day3.webp"
 import { HAPPENS_OPTIONS, HELP_OPTIONS, MOMENT_OPTIONS } from "./content"
-
-const DEFAULT_DELIVERY_TEXT = "הסיכום האישי שלכם יישלח אליכם בוואטסאפ עד 24 שעות."
 
 const Section = styled.section`
   display: flex;
@@ -122,42 +119,37 @@ const KeyLine = styled.p`
   line-height: 1.5;
   color: var(--deep);
 `
+const OPENING =
+  "הגענו ליום האחרון 🌿 ביומיים האחרונים הסתכלנו על איך היום שלך נראה ועל ארוחה אחת מתוכו. היום נבחר רגע אחד שקצת יותר קשה לך ונחשוב איך אפשר להפוך אותו לפשוט יותר."
+
+const toggle = <T extends string>(list: T[], value: T): T[] =>
+  list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
+
 export default function Day3Page() {
   const { participant, updateSection } = useParticipant()
   const { isCompleted, complete, resultRef } = useCompletion("day3")
   const coach = useCoachPublicInfo(participant.coachSlug)
   const data = participant.day3
+  const ready =
+    Boolean(data.momentChoice) && data.happensChoices.length > 0 && data.helpChoices.length > 0
 
   return (
     <PageShell>
       <PageInner>
-        <DayHeader
-          day={3}
-          image={day3Image}
-          title="הפתרון שלי"
-          lead="היום בוחרים רגע אחד קשה, ומוצאים לו פתרון קטן שמתאים לחיים האמיתיים."
-        />
-
-        <WhyItMatters>
-          <Subtle style={{ margin: 0 }}>
-            לעיתים קרובות הקושי באוכל קשור לרגע ולא לכוח רצון: מתי שאנחנו עייפים, רעבים או לחוצים,
-            ומה זמין לנו באותו רגע. כשמבינים מה קורה ברגע הזה, אפשר לשנות דבר קטן אחד במקום לשנות
-            הכול.
-          </Subtle>
-        </WhyItMatters>
+        <DayHeader day={3} image={day3Image} title="הפתרון שלי" lead={OPENING} />
 
         <Section>
-          <SectionTitle>שלוש בחירות לרגע אחד</SectionTitle>
+          <SectionTitle>שלוש שאלות קצרות</SectionTitle>
 
           <QuestionCard>
             <QuestionLabel>
               <StepNumber aria-hidden>1</StepNumber>
-              הרגע ביום שבו הכי קשה לי לאכול כמו שהייתי רוצה:
+              מתי זה קורה?
             </QuestionLabel>
             <ChoiceGroup
               value={data.momentChoice}
               onValueChange={(v) => updateSection("day3", { momentChoice: v as Day3MomentChoice })}
-              aria-label="הרגע ביום שבו הכי קשה לי לאכול כמו שהייתי רוצה"
+              aria-label="מתי זה קורה?"
             >
               {MOMENT_OPTIONS.map((o) => (
                 <ChoicePill key={o.value} value={o.value}>
@@ -165,44 +157,92 @@ export default function Day3Page() {
                 </ChoicePill>
               ))}
             </ChoiceGroup>
+            {data.momentChoice === "other" && (
+              <Input
+                aria-label="משהו אחר"
+                placeholder="משהו אחר"
+                maxLength={100}
+                value={data.momentOther}
+                onChange={(e) => updateSection("day3", { momentOther: e.target.value })}
+              />
+            )}
           </QuestionCard>
 
           <QuestionCard>
             <QuestionLabel>
               <StepNumber aria-hidden>2</StepNumber>
-              כשזה קורה, מה בדרך כלל קורה אצלי?
+              מה בדרך כלל קורה שם?
             </QuestionLabel>
-            <ChoiceGroup
-              value={data.happensChoice}
-              onValueChange={(v) =>
-                updateSection("day3", { happensChoice: v as Day3HappensChoice })
-              }
-              aria-label="כשזה קורה, מה בדרך כלל קורה אצלי?"
-            >
+            <Subtle style={{ margin: 0 }}>אפשר לבחור כמה.</Subtle>
+            <MultiChoiceGroup aria-label="מה בדרך כלל קורה שם?">
               {HAPPENS_OPTIONS.map((o) => (
-                <ChoicePill key={o.value} value={o.value}>
+                <MultiChoicePill
+                  key={o.value}
+                  checked={data.happensChoices.includes(o.value)}
+                  onToggle={() =>
+                    updateSection("day3", {
+                      happensChoices: toggle<Day3HappensChoice>(data.happensChoices, o.value),
+                    })
+                  }
+                >
                   {o.label}
-                </ChoicePill>
+                </MultiChoicePill>
               ))}
-            </ChoiceGroup>
+            </MultiChoiceGroup>
+            {data.happensChoices.includes("other") && (
+              <Input
+                aria-label="משהו אחר"
+                placeholder="משהו אחר"
+                maxLength={100}
+                value={data.happensOther}
+                onChange={(e) => updateSection("day3", { happensOther: e.target.value })}
+              />
+            )}
           </QuestionCard>
 
           <QuestionCard>
             <QuestionLabel>
               <StepNumber aria-hidden>3</StepNumber>
-              מה היה עוזר לי ברגע הזה:
+              מה יכול להקל על הרגע הזה?
             </QuestionLabel>
-            <ChoiceGroup
-              value={data.helpChoice}
-              onValueChange={(v) => updateSection("day3", { helpChoice: v as Day3HelpChoice })}
-              aria-label="מה היה עוזר לי ברגע הזה"
-            >
+            <Subtle style={{ margin: 0 }}>אפשר לבחור כמה.</Subtle>
+            <MultiChoiceGroup aria-label="מה יכול להקל על הרגע הזה?">
               {HELP_OPTIONS.map((o) => (
-                <ChoicePill key={o.value} value={o.value}>
+                <MultiChoicePill
+                  key={o.value}
+                  checked={data.helpChoices.includes(o.value)}
+                  onToggle={() =>
+                    updateSection("day3", {
+                      helpChoices: toggle<Day3HelpChoice>(data.helpChoices, o.value),
+                    })
+                  }
+                >
                   {o.label}
-                </ChoicePill>
+                </MultiChoicePill>
               ))}
-            </ChoiceGroup>
+            </MultiChoiceGroup>
+            {data.helpChoices.includes("other") && (
+              <Input
+                aria-label="משהו אחר"
+                placeholder="משהו אחר"
+                maxLength={100}
+                value={data.helpOther}
+                onChange={(e) => updateSection("day3", { helpOther: e.target.value })}
+              />
+            )}
+          </QuestionCard>
+
+          <QuestionCard>
+            <Label htmlFor="day3-one-thing">
+              עכשיו בחר/י את הדבר האחד שהכי היית רוצה שיהיה לך קל יותר בשבוע הקרוב.
+            </Label>
+            <Input
+              id="day3-one-thing"
+              maxLength={100}
+              placeholder="רשות"
+              value={data.oneThing}
+              onChange={(e) => updateSection("day3", { oneThing: e.target.value })}
+            />
           </QuestionCard>
 
           <QuestionCard>
@@ -225,13 +265,13 @@ export default function Day3Page() {
             <li>הרגל של שעה קבועה</li>
             <li>מצב רגשי</li>
           </Chips>
-          <KeyLine>לרוב מספיק לשנות אחד מהם.</KeyLine>
+          <KeyLine>עכשיו כבר יש לנו נקודה אחת שאפשר להתחיל להקל עליה 🌿</KeyLine>
         </Section>
 
-        <DoneButton disabled={!data.momentChoice} onClick={() => void complete()}>
+        <DoneButton disabled={!ready} onClick={() => void complete()}>
           סיימתי ✓
         </DoneButton>
-        {!data.momentChoice && <DoneHint>כדי לסיים, בחרו את הרגע הקשה בשאלה הראשונה</DoneHint>}
+        {!ready && <DoneHint>כדי לסיים, ענו על שלוש השאלות (בשאלות 2 ו-3 מספיקה בחירה אחת)</DoneHint>}
 
         <ResultArea ref={resultRef}>
           {isCompleted && (
@@ -241,8 +281,15 @@ export default function Day3Page() {
               <CompletionMessage />
 
               <Celebration>
-                <h2>🎉 סיימתם את שלושת הימים, וזה לא מובן מאליו.</h2>
-                <p>{coach?.summaryDeliveryText?.trim() || DEFAULT_DELIVERY_TEXT}</p>
+                <h2>מעולה ❤️</h2>
+                <p>
+                  עכשיו יש לנו את שלושת החלקים של התמונה: איך היום שלך נראה, איך נראית ארוחה אחת,
+                  ואיפה הכי קשה לך ומה יכול להקל.
+                </p>
+                <p>אני אעבור על מה ששיתפת ואחזור אליך עם סיכום אישי וכלים שמתאימים לך.</p>
+                <p>
+                  התשובות שלך נשארות אצלי, ומשמשות רק לסיכום האישי שלך ולהצעה להמשך, אם תרצה.
+                </p>
               </Celebration>
 
               <CommunityInvite communityUrl={coach?.communityUrl} />

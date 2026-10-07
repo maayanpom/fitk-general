@@ -12,33 +12,33 @@ export type Day2Data = {
   completedAt: string
 }
 
+// Day 3 answers. Question 1 is single choice, questions 2 and 3 allow several.
+// "other" opens a short free-text field (the *Other fields).
 export type Day3MomentChoice = "morning" | "lunchWork" | "afternoon" | "evening" | "weekend" | "other" | ""
 export type Day3HappensChoice =
   | "skip"
-  | "grabWhatever"
-  | "quickStanding"
-  | "screen"
+  | "eatAvailable"
+  | "veryHungry"
+  | "eatFast"
   | "orderIn"
-  | "largeAmount"
   | "other"
-  | ""
-// Shared taxonomy: what would help (question 3) and the weekly experiment
-// use the same categories - the experiment defaults to whatever was picked
-// for "what would help", and can be changed independently from there.
 export type Day3HelpChoice =
   | "readyMade"
-  | "reminder"
-  | "protein"
-  | "drink"
-  | "planAhead"
-  | "smallHelp"
+  | "quickMeal"
+  | "proteinAvailable"
+  | "takeAlong"
+  | "shortPlan"
+  | "noTimeSolution"
   | "other"
-  | ""
 
 export type Day3Data = {
   momentChoice: Day3MomentChoice
-  happensChoice: Day3HappensChoice
-  helpChoice: Day3HelpChoice
+  momentOther: string
+  happensChoices: Day3HappensChoice[]
+  happensOther: string
+  helpChoices: Day3HelpChoice[]
+  helpOther: string
+  oneThing: string
   extraNote: string
   completedAt: string
 }
@@ -78,8 +78,12 @@ const emptyDay2 = (): Day2Data => ({
 
 const emptyDay3 = (): Day3Data => ({
   momentChoice: "",
-  happensChoice: "",
-  helpChoice: "",
+  momentOther: "",
+  happensChoices: [],
+  happensOther: "",
+  helpChoices: [],
+  helpOther: "",
+  oneThing: "",
   extraNote: "",
   completedAt: "",
 })

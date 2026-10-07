@@ -24,7 +24,8 @@ const Card = styled.label`
   transition: background 0.15s, border-color 0.15s, transform 0.1s;
 
   /* The whole card is the radio's hit target; the radio itself stays invisible. */
-  button[role="radio"] {
+  button[role="radio"],
+  button[role="checkbox"] {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -77,3 +78,36 @@ export function ChoicePill({ value, children }: { value: string; children: strin
     </Card>
   )
 }
+
+// Multi-select variant: same card, toggled with a checkbox-role button.
+export function MultiChoicePill({
+  checked,
+  onToggle,
+  children,
+}: {
+  checked: boolean
+  onToggle: () => void
+  children: string
+}) {
+  return (
+    <Card>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={checked}
+        data-state={checked ? "checked" : "unchecked"}
+        onClick={onToggle}
+      />
+      <span className="tick" aria-hidden>
+        <Check size={18} strokeWidth={3} />
+      </span>
+      {children}
+    </Card>
+  )
+}
+
+export const MultiChoiceGroup = styled.div.attrs({ role: "group" })`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+`
