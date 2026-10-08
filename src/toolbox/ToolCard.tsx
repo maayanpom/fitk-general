@@ -96,7 +96,7 @@ export function ToolCard({ tool, onOpen, framed, because }: Props) {
   const view = framed && tool.framed ? tool.framed : { emoji: tool.emoji, name: tool.name, summary: tool.summary }
   return (
     <Card>
-      <Open type="button" onClick={() => !tool.isProduct && onOpen(tool)}>
+      <Open type="button" onClick={() => onOpen(tool)}>
         <Icon aria-hidden>{view.emoji}</Icon>
         <Text>
           <strong>{view.name}</strong>
@@ -106,11 +106,9 @@ export function ToolCard({ tool, onOpen, framed, because }: Props) {
       </Open>
       <Actions>
         <SaveToolButton toolId={tool.id} />
-        {!tool.isProduct && (
-          <More type="button" onClick={() => onOpen(tool)}>
-            לכל הפרטים
-          </More>
-        )}
+        <More type="button" onClick={() => onOpen(tool)}>
+          לכל הפרטים
+        </More>
       </Actions>
     </Card>
   )
