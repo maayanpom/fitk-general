@@ -144,14 +144,12 @@ export default function ToolboxPage() {
 
         {tiers.closest.length > 0 && (
           <Section>
-            <SectionTitle>⭐ הכי קרוב למה ששיתפתם</SectionTitle>
             <CardList>{tiers.closest.map((t) => renderCard(t, true))}</CardList>
           </Section>
         )}
 
         {tiers.maybe.length > 0 && (
           <Section>
-            <SectionTitle>💡 יכולים גם להתאים</SectionTitle>
             <CardList>{tiers.maybe.map((t) => renderCard(t))}</CardList>
           </Section>
         )}
